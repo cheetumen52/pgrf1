@@ -1,5 +1,7 @@
 package transforms;
 
+import java.util.Locale;
+
 /**
  * Virtual camera, controls view transformation via observer position, azimuth
  * and zenith (in radians). Eye position (the origin of camera coordinate set)
@@ -57,7 +59,7 @@ public class Camera {
 	 * 
 	 * @param cam
 	 *            camera to be copied
-	 * @param azimut
+	 * @param azimuth
 	 *            angle (in radians) between the xz and uv planes where v is the
 	 *            view vector and u is the up vector, i.e. the vector considered
 	 *            vertical by observer, i.e. the vector of the y-axis of the
@@ -87,7 +89,7 @@ public class Camera {
 	 * 
 	 * @param pos
 	 *            observer position
-	 * @param azimut
+	 * @param azimuth
 	 *            angle (in radians) between the xz and uv planes where v is the
 	 *            view vector and u is the up vector, i.e. the vector considered
 	 *            vertical by observer, i.e. the vector of the y-axis of the
@@ -391,4 +393,34 @@ public class Camera {
 	public Camera withZenith(final double ang) {
 		return new Camera(this, azimuth, ang);
 	}
+
+	/**
+	 * Returns String representation of this camera with floating point values formatted with the given format
+	 *
+	 * @return String
+	 */
+	public String toString(final String format) {
+		return String.format(Locale.US,
+				"Camera()\n" +
+						"	.withFirstPerson("+ getFirstPerson() + ")\n" +
+						"	.withPosition(new Vec3D"+ getPosition().toString(format) + ")\n" + String.format(Locale.US,
+						"	.withAzimuth("+ format + ")\n" +
+						"	.withZenith("+ format + ")\n" +
+						"	.withRadius("+ format + ")",
+						getAzimuth(), getZenith(), getRadius()
+				)
+		);
+
+
+	}
+	/**
+	 * Returns String representation of this camera
+	 *
+	 * @return String
+	 */
+	@Override
+	public String toString() {
+		return toString("%4.2f");
+	}
+
 }
