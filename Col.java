@@ -314,14 +314,61 @@ public class Col {
 	}
 
 	/**
+	 * Compares this object against the specified object.
+	 * 
+	 * @param obj
+	 *            the object to compare with.
+	 * @return {@code true} if the objects are the same; {@code false}
+	 *         otherwise.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return (this == obj) || (obj != null) && (obj instanceof Col) 
+				&& (new Double(((Col) obj).getR()).equals(getR()))
+				&& (new Double(((Col) obj).getG()).equals(getG()))
+				&& (new Double(((Col) obj).getB()).equals(getB()))
+				&& (new Double(((Col) obj).getA()).equals(getA()));
+	}
+
+	/**
+	 * Compares this Col against the specified Col with epsilon.
+	 * 
+	 * @param col
+	 *            the color to compare with.
+	 * @param epsilon
+	 *            the maximum epsilon between actual and specified value for
+	 *            which both numbers are still considered equal
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Col col, double epsilon) {
+		return (this == col) || (col != null) 
+				&& Compare.eEquals(getR(), col.getR(), epsilon)
+				&& Compare.eEquals(getG(), col.getG(), epsilon)
+				&& Compare.eEquals(getB(), col.getB(), epsilon)
+				&& Compare.eEquals(getA(), col.getA(), epsilon);
+	}
+
+	/**
+	 * Compares this Col against the specified Col with epsilon.
+	 * 
+	 * @param col
+	 *            the color to compare with.
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Col col) {
+		return eEquals(col, Compare.EPSILON);
+	}
+	
+	/**
 	 * Returns String representation of RGBA
 	 * 
 	 * @return comma separated floating-point values
 	 */
 	@Override
 	public String toString() {
-		return String
-				.format(Locale.US, "(%4.1f,%4.1f,%4.1f,%4.1f)", r, g, b, a);
+		return toString("%4.1f");
 	}
 
 	/**

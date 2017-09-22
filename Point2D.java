@@ -133,6 +133,42 @@ public class Point2D {
 	}
 
 	/**
+	 * Returns a clone of this point with the homogeneous x coordinate replaced by the
+	 * given value
+	 * 
+	 * @param x
+	 *            homogeneous x coordinate
+	 * @return new Point2D instance
+	 */
+	public Point2D withX(double x) {
+		return new Point2D(x, this.getY(), this.getW());
+	}
+	
+	/**
+	 * Returns a clone of this point with the homogeneous y coordinate replaced by the
+	 * given value
+	 * 
+	 * @param y
+	 *            homogeneous y coordinate
+	 * @return new Point2D instance
+	 */
+	public Point2D withY(double y) {
+		return new Point2D(this.getX(), y, this.getW());
+	}
+	
+	/**
+	 * Returns a clone of this point with the homogeneous w coordinate replaced by the
+	 * given value
+	 * 
+	 * @param w
+	 *            homogeneous w coordinate
+	 * @return new Point2D instance
+	 */
+	public Point2D withW(double w) {
+		return new Point2D(this.getX(), this.getY(), w);
+	}
+	
+	/**
 	 * Returns the result of multiplication by the given 3x3 matrix thus
 	 * applying the transformation contained within
 	 * 
@@ -207,13 +243,59 @@ public class Point2D {
 	}
 	
 	/**
+	 * Compares this object against the specified object.
+	 * 
+	 * @param obj
+	 *            the object to compare with.
+	 * @return {@code true} if the objects are the same; {@code false}
+	 *         otherwise.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return (this == obj) || (obj != null) && (obj instanceof Point2D) 
+				&& (new Double(((Point2D) obj).getX()).equals(getX()))
+				&& (new Double(((Point2D) obj).getY()).equals(getY()))
+				&& (new Double(((Point2D) obj).getW()).equals(getW()));
+	}
+
+	/**
+	 * Compares this Point2D against the specified Point2D.
+	 * 
+	 * @param point
+	 *            the point to compare with.
+	 * @param epsilon
+	 *            the maximum epsilon between actual and specified value for
+	 *            which both numbers are still considered equal
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Point2D point, double epsilon) {
+		return (this == point) || (point != null) 
+				&& Compare.eEquals(getX(), point.getX(), epsilon) 
+				&& Compare.eEquals(getY(), point.getY(), epsilon) 
+				&& Compare.eEquals(getW(), point.getW(), epsilon);
+	}
+
+	/**
+	 * Compares this Point2D against the specified Point2D.
+	 * 
+	 * @param point
+	 *            the point to compare with.
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Point2D point) {
+		return eEquals(point, Compare.EPSILON);
+	}
+	
+	/**
 	 * Returns String representation of this point
 	 * 
 	 * @return comma separated floating-point values in parentheses
 	 */
 	@Override
 	public String toString() {
-		return String.format(Locale.US, "(%4.1f,%4.1f,%4.1f)", x, y, w);
+		return toString("%4.1f");
 	}
 	
 	/**

@@ -153,6 +153,55 @@ public class Point3D {
 		return w;
 	}
 
+	
+	/**
+	 * Returns a clone of this point with the homogeneous x coordinate replaced by the
+	 * given value
+	 * 
+	 * @param x
+	 *            homogeneous x coordinate
+	 * @return new Point3D instance
+	 */
+	public Point3D withX(double x) {
+		return new Point3D(x, this.getY(), this.getZ(), this.getW());
+	}
+	
+	/**
+	 * Returns a clone of this point with the homogeneous y coordinate replaced by the
+	 * given value
+	 * 
+	 * @param y
+	 *            homogeneous y coordinate
+	 * @return new Point3D instance
+	 */
+	public Point3D withY(double y) {
+		return new Point3D(this.getX(), y, this.getZ(), this.getW());
+	}
+	
+	/**
+	 * Returns a clone of this point with the homogeneous z coordinate replaced by the
+	 * given value
+	 * 
+	 * @param z
+	 *            homogeneous z coordinate
+	 * @return new Point3D instance
+	 */
+	public Point3D withZ(double z) {
+		return new Point3D(this.getX(), this.getY(), z, this.getW());
+	}
+	
+	/**
+	 * Returns a clone of this point with the homogeneous w coordinate replaced by the
+	 * given value
+	 * 
+	 * @param w
+	 *            homogeneous w coordinate
+	 * @return new Point3D instance
+	 */
+	public Point3D withW(double w) {
+		return new Point3D(this.getX(), this.getY(), this.getZ(), w);
+	}
+	
 	/**
 	 * Returns the result of multiplication by the given 4x4 matrix thus
 	 * applying the transformation contained within
@@ -234,13 +283,61 @@ public class Point3D {
 	}
 	
 	/**
+	 * Compares this object against the specified object.
+	 * 
+	 * @param obj
+	 *            the object to compare with.
+	 * @return {@code true} if the objects are the same; {@code false}
+	 *         otherwise.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return (this == obj) || (obj != null) && (obj instanceof Point3D) 
+				&& (new Double(((Point3D) obj).getX()).equals(getX()))
+				&& (new Double(((Point3D) obj).getY()).equals(getY()))
+				&& (new Double(((Point3D) obj).getZ()).equals(getZ()))
+				&& (new Double(((Point3D) obj).getW()).equals(getW()));
+	}
+
+	/**
+	 * Compares this Point3D against the specified Point3D.
+	 * 
+	 * @param point
+	 *            the point to compare with.
+	 * @param epsilon
+	 *            the maximum epsilon between actual and specified value for
+	 *            which both numbers are still considered equal
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Point3D point, double epsilon) {
+		return (this == point) || (point != null) 
+				&& Compare.eEquals(getX(), point.getX(), epsilon) 
+				&& Compare.eEquals(getY(), point.getY(), epsilon)
+				&& Compare.eEquals(getZ(), point.getZ(), epsilon) 
+				&& Compare.eEquals(getW(), point.getW(), epsilon);
+	}
+
+	/**
+	 * Compares this Point3D against the specified Point3D.
+	 * 
+	 * @param point
+	 *            the point to compare with.
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Point3D point) {
+		return eEquals(point, Compare.EPSILON);
+	}
+    
+    /**
 	 * Returns String representation of this point
 	 * 
 	 * @return comma separated floating-point values in parentheses
 	 */
 	@Override
 	public String toString() {
-		return String.format(Locale.US, "(%4.1f,%4.1f,%4.1f,%4.1f)", x, y, z, w);
+		return toString("%4.1f");
 	}
 	
 	/**
@@ -250,7 +347,7 @@ public class Point3D {
 	 * 
 	 * @param format
 	 *            String format applied to each coordinate
-	 * @return comma separated floating-point values in parentheses
+	 * @return comma separated floating-point values in parentheses, useful in constructor
 	 */
 	public String toString(final String format) {
 		return String.format(Locale.US, "(" + format + "," + format + "," + format + "," + format + ")", x, y, z, w);

@@ -358,6 +358,52 @@ public class Mat4 {
 	}
 	
 	/**
+     * Compares this object against the specified object.  
+     * @param   obj   the object to compare with.
+     * @return  {@code true} if the objects are the same;
+     *          {@code false} otherwise.
+     */
+	@Override
+	public boolean equals(Object obj) {
+		return (this == obj) || (obj != null) && (obj instanceof Mat4) 
+			&& (((Mat4) obj).getRow(0)).equals(getRow(0))
+			&& (((Mat4) obj).getRow(1)).equals(getRow(1))
+			&& (((Mat4) obj).getRow(2)).equals(getRow(2))
+			&& (((Mat4) obj).getRow(3)).equals(getRow(3));
+	}
+	
+	/**
+	 * Compares this Mat4 against the specified Mat4.
+	 * 
+	 * @param mat
+	 *            the mat to compare with.
+	 * @param epsilon
+	 *            the maximum epsilon between actual and specified value for
+	 *            which both mats are still considered equal
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Mat4 mat, double epsilon) {
+		return (this == mat) || (mat != null) 
+				&& getRow(0).eEquals( mat.getRow(0), epsilon) 
+				&& getRow(1).eEquals( mat.getRow(1), epsilon)
+				&& getRow(2).eEquals( mat.getRow(2), epsilon) 
+				&& getRow(3).eEquals( mat.getRow(3), epsilon);
+	}
+
+	/**
+	 * Compares this Mat4 against the specified Mat4.
+	 * 
+	 * @param mat
+	 *            the mat to compare with.
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Mat4 mat) {
+		return eEquals(mat, Compare.EPSILON);
+	}
+	
+	/**
 	 * Returns String representation of this matrix
 	 * 
 	 * @return comma separated floating-point values per row, rows comma
@@ -365,11 +411,7 @@ public class Mat4 {
 	 */
 	@Override
 	public String toString() {
-		return String.format(Locale.US, "{%4.1f,%4.1f,%4.1f,%4.1f},\n"+"{%4.1f,%4.1f,%4.1f,%4.1f},\n"+"{%4.1f,%4.1f,%4.1f,%4.1f},\n"+"{%4.1f,%4.1f,%4.1f,%4.1f}",
-				mat[0][0], mat[0][1], mat[0][2], mat[0][3],
-				mat[1][0], mat[1][1], mat[1][2], mat[1][3],
-				mat[2][0], mat[2][1], mat[2][2], mat[2][3],
-				mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
+		return toString("%4.1f");
 	}
 	
 	/**
@@ -383,10 +425,10 @@ public class Mat4 {
 	 *         separated in curly brackets
 	 */
 	public String toString(final String format) {
-		return String.format(Locale.US, "{{"+format+","+format+","+format+","+format+"},"+
-				"{"+format+","+format+","+format+","+format+"},\n"+
-				"{"+format+","+format+","+format+","+format+"},\n"+
-				"{"+format+","+format+","+format+","+format+"}\n",
+		return String.format(Locale.US, "{{"+format+","+format+","+format+","+format+"},\n"+
+				" {"+format+","+format+","+format+","+format+"},\n"+
+				" {"+format+","+format+","+format+","+format+"},\n"+
+				" {"+format+","+format+","+format+","+format+"}}",
 				mat[0][0], mat[0][1], mat[0][2], mat[0][3],
 				mat[1][0], mat[1][1], mat[1][2], mat[1][3],
 				mat[2][0], mat[2][1], mat[2][2], mat[2][3],

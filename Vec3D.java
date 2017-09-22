@@ -38,7 +38,19 @@ public class Vec3D {
 	}
 
 	/**
-	 * Creates a vector by cloning the give one
+	 * Creates a vector with all coordinates set to the given value
+	 * 
+	 * @param value
+	 *            coordinate
+	 */
+	public Vec3D(final double value) {
+		this.x = value;
+		this.y = value;
+		this.z = value;
+	}
+
+	/**
+	 * Creates a vector by cloning the given one
 	 * 
 	 * @param v
 	 *            vector to be cloned
@@ -104,6 +116,42 @@ public class Vec3D {
 	}
 
 	/**
+	 * Returns a clone of this vector with the x coordinate replaced by the
+	 * given value
+	 * 
+	 * @param x
+	 *            x coordinate
+	 * @return new Vec3D instance
+	 */
+	public Vec3D withX(double x) {
+		return new Vec3D(x, this.getY(), this.getZ());
+	}
+	
+	/**
+	 * Returns a clone of this vector with the y coordinate replaced by the
+	 * given value
+	 * 
+	 * @param y
+	 *            y coordinate
+	 * @return new Vec3D instance
+	 */
+	public Vec3D withY(double y) {
+		return new Vec3D(this.getX(), y, this.getZ());
+	}
+
+	/**
+	 * Returns a clone of this vector with the z coordinate replaced by the
+	 * given value
+	 * 
+	 * @param z
+	 *            z coordinate
+	 * @return new Vec3D instance
+	 */
+	public Vec3D withZ(double z) {
+		return new Vec3D(this.getX(), this.getY(), z);
+	}
+	
+	/**
 	 * Returns 2D vector with this x and y coordinates, i.e. an orthogonal
 	 * projection of this as an affine point into the xy plane
 	 * 
@@ -118,7 +166,7 @@ public class Vec3D {
 	 * 
 	 * @param v
 	 *            vector to add
-	 * @return new Vec2D instance
+	 * @return new Vec3D instance
 	 */
 	public Vec3D add(final Vec3D v) {
 		return new Vec3D(x + v.x, y + v.y, z + v.z);
@@ -129,7 +177,7 @@ public class Vec3D {
 	 * 
 	 * @param v
 	 *            vector to subtract
-	 * @return new Vec2D instance
+	 * @return new Vec3D instance
 	 */
 	public Vec3D sub(final Vec3D v) {
 		return new Vec3D(x - v.x, y - v.y, z - v.z);
@@ -140,7 +188,7 @@ public class Vec3D {
 	 * 
 	 * @param d
 	 *            scalar value of type double
-	 * @return new Vec2D instance
+	 * @return new Vec3D instance
 	 */
 	public Vec3D mul(final double d) {
 		return new Vec3D(x * d, y * d, z * d);
@@ -169,7 +217,7 @@ public class Vec3D {
 	 * @return new Vec3D instance
 	 */
 	public Vec3D mul(final Quat q) {
-		final Quat p = q.mulR(new Quat(0, x, y, z)).mulR(q.inv());
+		final Quat p = q.mulR(new Quat(0, x, y, z)).mulR(q.inverse());
 		return new Vec3D(p.i, p.j, p.k);
 	}
 
@@ -178,7 +226,7 @@ public class Vec3D {
 	 * 
 	 * @param v
 	 *            3D vector 
-	 * @return new Vec2D instance
+	 * @return new Vec3D instance
 	 */
 	public Vec3D mul(final Vec3D v) {
 		return new Vec3D(x * v.x, y * v.y, z * v.z);
@@ -241,12 +289,57 @@ public class Vec3D {
 	}
 
 	/**
+	 * Compares this object against the specified object.
+	 * 
+	 * @param obj
+	 *            the object to compare with.
+	 * @return {@code true} if the objects are the same; {@code false}
+	 *         otherwise.
+	 */
+	public boolean equals(Object obj) {
+		return (this == obj) || (obj != null) && (obj instanceof Vec3D) 
+				&& (new Double(((Vec3D) obj).getX()).equals(getX()))
+				&& (new Double(((Vec3D) obj).getY()).equals(getY()))
+				&& (new Double(((Vec3D) obj).getZ()).equals(getZ()));
+	}
+
+	/**
+	 * Compares this Vec3D against the specified Vec3D with epsilon.
+	 * 
+	 * @param vec
+	 *            the vector to compare with.
+	 * @param epsilon
+	 *            the maximum epsilon between actual and specified value for
+	 *            which both numbers are still considered equal
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Vec3D vec, double epsilon) {
+		return (this == vec) || (vec != null) 
+				&& Compare.eEquals(getX(), vec.getX(), epsilon)
+				&& Compare.eEquals(getY(), vec.getY(), epsilon)
+				&& Compare.eEquals(getZ(), vec.getZ(), epsilon)	;
+	}
+
+	/**
+	 * Compares this Vec3D against the specified Vec3D with epsilon.
+	 * 
+	 * @param vec
+	 *            the vector to compare with.
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Vec3D vec) {
+		return eEquals(vec, Compare.EPSILON);
+	}
+	
+	/**
 	 * Returns String representation of this vector
 	 * 
-	 * @return comma separated floating-point values in curly brackets
+	 * @return comma separated floating-point values in brackets
 	 */
 	public String toString() {
-		return String.format(Locale.US, "{%4.1f,%4.1f,%4.1f}", x, y, z);
+		return toString("%4.1f");
 	}
 
 	/**
@@ -256,10 +349,10 @@ public class Vec3D {
 	 * 
 	 * @param format
 	 *            String format applied to each coordinate
-	 * @return comma separated floating-point values in curly brackets
+	 * @return comma separated floating-point values in brackets
 	 */
 	public String toString(String format) {
-		return String.format(Locale.US, "{" + format + "," + format + "," + format + "}",
+		return String.format(Locale.US, "(" + format + "," + format + "," + format + ")",
 				x, y, z);
 	}
 }

@@ -36,6 +36,17 @@ public class Vec2D {
 	}
 
 	/**
+	 * Creates a vector with all coordinates set to the given value
+	 * 
+	 * @param value
+	 *            coordinate
+	 */
+	public Vec2D(final double value) {
+		this.x = value;
+		this.y = value;
+	}
+	
+	/**
 	 * Creates a vector by cloning the give one
 	 * 
 	 * @param v
@@ -63,6 +74,30 @@ public class Vec2D {
 	 */
 	public double getY() {
 		return y;
+	}
+
+	/**
+	 * Returns a clone of this vector with the x coordinate replaced by the
+	 * given value
+	 * 
+	 * @param x
+	 *            x coordinate
+	 * @return new Vec2D instance
+	 */
+	public Vec2D withX(double x) {
+		return new Vec2D(x, this.getY());
+	}
+	
+	/**
+	 * Returns a clone of this vector with the y coordinate replaced by the
+	 * given value
+	 * 
+	 * @param y
+	 *            y coordinate
+	 * @return new Vec2D instance
+	 */
+	public Vec2D withY(double y) {
+		return new Vec2D(this.getX(), y);
 	}
 
 	/**
@@ -154,12 +189,56 @@ public class Vec2D {
 	}
 
 	/**
+	 * Compares this object against the specified object.
+	 * 
+	 * @param obj
+	 *            the object to compare with.
+	 * @return {@code true} if the objects are the same; {@code false}
+	 *         otherwise.
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return (this == obj) || (obj != null) && (obj instanceof Vec2D) 
+				&& (new Double(((Vec2D) obj).getX()).equals(getX()))
+				&& (new Double(((Vec2D) obj).getY()).equals(getY()));
+	}
+
+	/**
+	 * Compares this Vec2D against the specified Vec2D with epsilon.
+	 * 
+	 * @param vec
+	 *            the vector to compare with.
+	 * @param epsilon
+	 *            the maximum epsilon between actual and specified value for
+	 *            which both numbers are still considered equal
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Vec2D vec, double epsilon) {
+		return (this == vec) || (vec != null) 
+				&& Compare.eEquals(getX(), vec.getX(), epsilon)
+				&& Compare.eEquals(getY(), vec.getY(), epsilon);
+	}
+
+	/**
+	 * Compares this Vec2D against the specified Vec2D with epsilon.
+	 * 
+	 * @param vec
+	 *            the vector to compare with.
+	 * @return {@code true} if the objects are considered equal; {@code false}
+	 *         otherwise.
+	 */
+	public boolean eEquals(Vec2D vec) {
+		return eEquals(vec, Compare.EPSILON);
+	}
+	
+	/**
 	 * Returns String representation of this vector
 	 * 
-	 * @return comma separated floating-point values in curly brackets
+	 * @return comma separated floating-point values in brackets
 	 */
 	public String toString() {
-		return String.format(Locale.US, "{%4.1f,%4.1f}", x, y);
+		return toString("%4.1f");
 	}
 
 	/**
@@ -169,9 +248,9 @@ public class Vec2D {
 	 * 
 	 * @param format
 	 *            String format applied to each coordinate
-	 * @return comma separated floating-point values in curly brackets
+	 * @return comma separated floating-point values in brackets
 	 */
 	public String toString(String format) {
-		return String.format(Locale.US, "{" + format + "," + format + "}",	x, y);
+		return String.format(Locale.US, "(" + format + "," + format + ")",	x, y);
 	}
 }
