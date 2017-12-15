@@ -31,9 +31,17 @@ public class Mat4Scale extends Mat4Identity {
 	 *            x,y,z -axis scale factor
 	 */
 	public Mat4Scale(final double scale) {
-		mat[0][0] = scale;
-		mat[1][1] = scale;
-		mat[2][2] = scale;
+		this(scale, scale, scale);
+	}
+
+	/**
+	 * Creates a 4x4 transformation matrix equivalent to scaling in 3D
+	 * 
+	 * @param v
+	 *            vector scale factor
+	 */
+	public Mat4Scale(final Vec3D v) {
+		this(v.getX(), v.getY(), v.getZ());
 	}
 
 }

@@ -21,4 +21,24 @@ public class Mat3Scale2D extends Mat3Identity {
 		mat[1][1] = y;
 	}
 
+	/**
+	 * Creates a 3x3 transformation matrix equivalent to uniform scaling in 2D
+	 * 
+	 * @param scale
+	 *            x,y -axis scale factor
+	 */
+	public Mat3Scale2D(final double scale) {
+		this(scale, scale);
+	}
+
+	/**
+	 * Creates a 3x3 transformation matrix equivalent to scaling in 2D
+	 * 
+	 * @param v
+	 *            vector scale factor
+	 */
+	public Mat3Scale2D(final Vec2D v) {
+		this(v.getX(), v.getY());
+	}
+
 }

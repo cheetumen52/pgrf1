@@ -23,5 +23,14 @@ public class Mat4Transl extends Mat4Identity {
 		mat[3][1] = y;
 		mat[3][2] = z;
 	}
+	/**
+	 * Creates a 4x4 transformation matrix equivalent to translation in 3D
+	 * 
+	 * @param v
+	 *            translation vector
+	 */
+	public Mat4Transl(final Vec3D v) {
+		this(v.getX(), v.getY(), v.getZ());
+	}
 
 }
