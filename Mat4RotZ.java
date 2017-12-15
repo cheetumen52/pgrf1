@@ -16,9 +16,9 @@ public class Mat4RotZ extends Mat4Identity {
 	 *            rotation angle in radians
 	 */
 	public Mat4RotZ(final double alpha) {
-		mat[0][0] = (double) Math.cos(alpha);
-		mat[1][1] = (double) Math.cos(alpha);
-		mat[1][0] = (double) -Math.sin(alpha);
-		mat[0][1] = (double) Math.sin(alpha);
+		mat[0][0] = Math.cos(alpha);
+		mat[1][1] = Math.cos(alpha);
+		mat[1][0] = -Math.sin(alpha);
+		mat[0][1] = Math.sin(alpha);
 	}
 }
