@@ -403,12 +403,11 @@ public class Camera {
 		return String.format(Locale.US,
 				"Camera()\n" +
 						"	.withFirstPerson("+ getFirstPerson() + ")\n" +
-						"	.withPosition(new Vec3D"+ getPosition().toString(format) + ")\n" + String.format(Locale.US,
+						"	.withPosition(new Vec3D"+ getPosition().toString(format) + ")\n" + 
 						"	.withAzimuth("+ format + ")\n" +
 						"	.withZenith("+ format + ")\n" +
 						"	.withRadius("+ format + ")",
 						getAzimuth(), getZenith(), getRadius()
-				)
 		);
 
 
