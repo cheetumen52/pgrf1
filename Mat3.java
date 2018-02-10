@@ -1,5 +1,6 @@
 package transforms;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -16,9 +17,19 @@ public class Mat3 {
 	 * Creates a zero 3x3 matrix
 	 */
 	public Mat3() {
+		this(0.0);
+	}
+
+	/**
+	 * Creates a 3x3 matrix of value
+	 * 
+	 * @param value
+	 *            value of all elements of matrix
+	 */
+	public Mat3(final double value) {
 		for (int i = 0; i < 3; i++)
 			for (int j = 0; j < 3; j++)
-				mat[i][j] = 0.0;
+				mat[i][j] = value;
 	}
 
 	/**
@@ -320,7 +331,18 @@ public class Mat3 {
 			&& (((Mat3) obj).getRow(2)).equals(getRow(2));
 	}
 	
+
 	/**
+     * Returns a hash code value for the object. 
+     * 
+     * @return  a hash code value for this object.
+     */
+    @Override
+	public int hashCode(){
+		return Arrays.hashCode(floatArray());
+	}
+
+    /**
 	 * Compares this Mat3 against the specified Mat3.
 	 * 
 	 * @param mat

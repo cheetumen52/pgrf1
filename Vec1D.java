@@ -1,6 +1,7 @@
 package transforms;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * 1D vector over real numbers (final double-precision), equivalent to 1D affine
@@ -94,6 +95,16 @@ public class Vec1D {
 		return new Vec1D(-x);
 	}
 
+	/**
+     * Returns a hash code value for the object. 
+     * 
+     * @return  a hash code value for this object.
+     */
+    @Override
+	public int hashCode(){
+		return Objects.hash(this.getX());
+	}
+    
 	/**
 	 * Compares this object against the specified object.
 	 * 

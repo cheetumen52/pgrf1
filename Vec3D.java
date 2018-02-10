@@ -1,6 +1,7 @@
 package transforms;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -296,6 +297,7 @@ public class Vec3D {
 	 * @return {@code true} if the objects are the same; {@code false}
 	 *         otherwise.
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		return (this == obj) || (obj != null) && (obj instanceof Vec3D) 
 				&& (new Double(((Vec3D) obj).getX()).equals(getX()))
@@ -303,6 +305,16 @@ public class Vec3D {
 				&& (new Double(((Vec3D) obj).getZ()).equals(getZ()));
 	}
 
+	/**
+     * Returns a hash code value for the object. 
+     * 
+     * @return  a hash code value for this object.
+     */
+    @Override
+	public int hashCode(){
+		return Objects.hash(this.getX(), this.getY(), this.getZ());
+	}
+    
 	/**
 	 * Compares this Vec3D against the specified Vec3D with epsilon.
 	 * 
@@ -338,6 +350,7 @@ public class Vec3D {
 	 * 
 	 * @return comma separated floating-point values in brackets
 	 */
+	@Override
 	public String toString() {
 		return toString("%4.1f");
 	}

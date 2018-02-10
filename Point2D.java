@@ -1,6 +1,7 @@
 package transforms;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -256,6 +257,16 @@ public class Point2D {
 				&& (new Double(((Point2D) obj).getX()).equals(getX()))
 				&& (new Double(((Point2D) obj).getY()).equals(getY()))
 				&& (new Double(((Point2D) obj).getW()).equals(getW()));
+	}
+
+	/**
+     * Returns a hash code value for the object. 
+     * 
+     * @return  a hash code value for this object.
+     */
+    @Override
+	public int hashCode(){
+		return Objects.hash(this.getX(), this.getY(), this.getW());
 	}
 
 	/**

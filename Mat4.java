@@ -1,5 +1,6 @@
 package transforms;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -17,9 +18,19 @@ public class Mat4 {
 	 * Creates a zero 4x4 matrix
 	 */
 	public Mat4() {
+		this(0.0);
+	}
+
+	/**
+	 * Creates a 4x4 matrix of value
+	 * 
+	 * @param value
+	 *            value of all elements of matrix
+	 */
+	public Mat4(final double value) {
 		for (int i = 0; i < 4; i++)
 			for (int j = 0; j < 4; j++)
-				mat[i][j] = 0.0;
+				mat[i][j] = value;
 	}
 
 	/**
@@ -371,7 +382,17 @@ public class Mat4 {
 			&& (((Mat4) obj).getRow(2)).equals(getRow(2))
 			&& (((Mat4) obj).getRow(3)).equals(getRow(3));
 	}
-	
+
+	/**
+     * Returns a hash code value for the object. 
+     * 
+     * @return  a hash code value for this object.
+     */
+    @Override
+	public int hashCode(){
+		return Arrays.hashCode(floatArray());
+	}
+
 	/**
 	 * Compares this Mat4 against the specified Mat4.
 	 * 

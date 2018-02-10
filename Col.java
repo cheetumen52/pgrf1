@@ -1,6 +1,7 @@
 package transforms;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Four-channel RGB with alpha double-precision color representation, immutable
@@ -328,6 +329,16 @@ public class Col {
 				&& (new Double(((Col) obj).getG()).equals(getG()))
 				&& (new Double(((Col) obj).getB()).equals(getB()))
 				&& (new Double(((Col) obj).getA()).equals(getA()));
+	}
+
+	/**
+     * Returns a hash code value for the object. 
+     * 
+     * @return  a hash code value for this object.
+     */
+    @Override
+	public int hashCode(){
+		return Objects.hash(this.getR(), this.getG(), this.getB(), this.getA());
 	}
 
 	/**

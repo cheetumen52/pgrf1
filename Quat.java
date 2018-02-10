@@ -1,6 +1,7 @@
 package transforms;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A quaternion with common operations, immutable 
@@ -472,6 +473,16 @@ public class Quat {
 				&& (new Double(((Quat) obj).getK()).equals(getK()));
 	}
 
+	/**
+     * Returns a hash code value for the object. 
+     * 
+     * @return  a hash code value for this object.
+     */
+    @Override
+	public int hashCode(){
+		return Objects.hash(this.getR(), this.getI(), this.getJ(), this.getK());
+	}
+    
 	/**
 	 * Compares this Quat against the specified Quat with epsilon.
 	 * 

@@ -1,6 +1,7 @@
 package transforms;
 
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -201,6 +202,16 @@ public class Vec2D {
 		return (this == obj) || (obj != null) && (obj instanceof Vec2D) 
 				&& (new Double(((Vec2D) obj).getX()).equals(getX()))
 				&& (new Double(((Vec2D) obj).getY()).equals(getY()));
+	}
+
+	/**
+	 * Returns a hash code value for the object.
+	 * 
+	 * @return a hash code value for this object.
+	 */
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.getX(), this.getY());
 	}
 
 	/**
