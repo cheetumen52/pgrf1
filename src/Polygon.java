@@ -33,6 +33,8 @@ public class Polygon {
 	private Point start, last;
 	private model.Polygon pl = new model.Polygon();
 	private FilledLineRasterizer rasterizer;
+	private DashedLineRasterizer dashedRasterizer;
+	private PolygonRasterizer polygonRasterizer;
 
 	public Polygon(int width, int height) {
 		JFrame frame = new JFrame();
@@ -45,8 +47,8 @@ public class Polygon {
 
 		raster = new RasterBufferedImage(width, height);
 		rasterizer = new FilledLineRasterizer(raster);
-		DashedLineRasterizer dashedRasterizer = new DashedLineRasterizer(raster);
-		PolygonRasterizer polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
+		dashedRasterizer = new DashedLineRasterizer(raster);
+		polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
 
 		panel = new JPanel() {
 			private static final long serialVersionUID = 1L;
@@ -69,6 +71,7 @@ public class Polygon {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON1) {
+					//motion decisive variable
 					if (first) {
 						x = e.getX();
 						y = e.getY();
@@ -76,7 +79,6 @@ public class Polygon {
 						start = p;
 						pl.addPoints(p);
 						first = false;
-						lastAction = "polygon"; //motion decisive variable
 					} else {
 						x2 = e.getX();
 						y2 = e.getY();
@@ -86,22 +88,22 @@ public class Polygon {
 						x = x2;
 						y = y2;
 						pl.addPoints(p);
-						lastAction = "polygon"; //motion decisive variable
 					}
+					lastAction = "polygon"; //motion decisive variable
 				}
 				if (e.getButton() == MouseEvent.BUTTON2) {
+					//motion decisive variable
 					if (mx == -1 && my == -1) {
 						mx = e.getX();
 						my = e.getY();
-						lastAction = "line"; //motion decisive variable
 					} else {
 						Line ln = new Line(mx, my, e.getX(), e.getY(), Color.CYAN.getRGB());
 						rasterizer.rasterize(ln);
 						mx = -1;
 						my = -1;
 						lines.add(ln);
-						lastAction = "line"; //motion decisive variable
 					}
+					lastAction = "line"; //motion decisive variable
 				}
 
 				if (e.getButton() == MouseEvent.BUTTON3) {
@@ -113,10 +115,8 @@ public class Polygon {
 			public void mouseReleased(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON1) {
 					if (pl.getPoints().size() > 1) {
-						System.out.println("Test");
-						System.out.println(start.getX() + " " + start.getY() + " " + last.getX() + " " + last.getY());
 						Line ln = new Line(start, last, 0xff0000);
-						rasterizer.rasterize(ln);
+						dashedRasterizer.rasterize(ln);
 
 					}
 				}
@@ -146,7 +146,7 @@ public class Polygon {
 
 				clear(0xaaaaaa);
 				if (lastAction.equals("polygon")) rasterizer.rasterize(x, y, e.getX(), e.getY());
-				if (lastAction.equals("polygon") && pl.getPoints().size() > 1) {
+				if (lastAction.equals("polygon") && pl.getPoints().size() > 1) { // propojení nejstaršího bodu s počátkem
 					rasterizer.rasterize(new Point(e.getX(), e.getY()), start);
 				}
 				if (lastAction.equals("line") && mx != -1 && my != -1) rasterizer.rasterize(mx, my, e.getX(), e.getY());
@@ -167,11 +167,11 @@ public class Polygon {
 				if (panel.getWidth() <= raster.getWidth() && panel.getHeight() <= raster.getHeight()) //no resize if new one is smaller
 					return;
 				RasterBufferedImage newRaster = new RasterBufferedImage(panel.getWidth(), panel.getHeight());
-
 				newRaster.draw(raster);
 				raster = newRaster;
 				rasterizer = new FilledLineRasterizer(raster);
-
+				dashedRasterizer = new DashedLineRasterizer(raster);
+				polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
 			}
 		});
 
