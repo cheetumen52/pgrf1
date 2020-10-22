@@ -21,7 +21,7 @@ public class PolygonRasterizer {
             }
         }
         if (polygon.getPoints().size() > 1) {
-            lr.rasterize(polygon.getPoints().get(0), polygon.getPoints().get(polygon.getPoints().size() - 1));
+            lr.rasterize(polygon.getPoints().get(0), polygon.getPoints().get(polygon.getPoints().size() - 1)); // poslední point s prvním
         }
     }
 

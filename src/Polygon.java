@@ -37,27 +37,27 @@ public class Polygon {
 	private PolygonRasterizer polygonRasterizer;
 
 	public Polygon(int width, int height) {
-		JFrame frame = new JFrame();
+        JFrame frame = new JFrame();
 
-		frame.setLayout(new BorderLayout());
+        frame.setLayout(new BorderLayout());
 
-		frame.setTitle("UHK FIM PGRF : " + this.getClass().getName());
-		frame.setResizable(true);
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setTitle("UHK FIM PGRF : " + this.getClass().getName());
+        frame.setResizable(true);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-		raster = new RasterBufferedImage(width, height);
-		rasterizer = new FilledLineRasterizer(raster);
-		dashedRasterizer = new DashedLineRasterizer(raster);
-		polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
+        raster = new RasterBufferedImage(width, height);
+        rasterizer = new FilledLineRasterizer(raster);
+        dashedRasterizer = new DashedLineRasterizer(raster, pl);
+        polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
 
-		panel = new JPanel() {
-			private static final long serialVersionUID = 1L;
+        panel = new JPanel() {
+            private static final long serialVersionUID = 1L;
 
-			@Override
-			public void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				present(g);
-			}
+            @Override
+            public void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                present(g);
+            }
 		};
 		panel.setPreferredSize(new Dimension(width, height));
 
@@ -117,7 +117,6 @@ public class Polygon {
 					if (pl.getPoints().size() > 1) {
 						Line ln = new Line(start, last, 0xff0000);
 						dashedRasterizer.rasterize(ln);
-
 					}
 				}
 			}
@@ -127,16 +126,19 @@ public class Polygon {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_C) {
-					clear(0xaaaaaa);
-					pl = new model.Polygon();
-					lines = new ArrayList<>();
-					x = 0;
-					y = 0;
-					mx = -1;
-					my = -1;
-					first = true;
-					panel.repaint();
-				}
+                    clear(0xaaaaaa);
+                    pl = new model.Polygon();
+                    lines = new ArrayList<>();
+                    x = 0;
+                    y = 0;
+                    mx = -1;
+                    my = -1;
+                    first = true;
+                    start = null;
+                    last = null;
+                    lastAction = "";
+                    panel.repaint();
+                }
 			}
 		});
 
@@ -144,35 +146,39 @@ public class Polygon {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 
-				clear(0xaaaaaa);
-				if (lastAction.equals("polygon")) rasterizer.rasterize(x, y, e.getX(), e.getY());
-				if (lastAction.equals("polygon") && pl.getPoints().size() > 1) { // propojení nejstaršího bodu s počátkem
-					rasterizer.rasterize(new Point(e.getX(), e.getY()), start);
-				}
-				if (lastAction.equals("line") && mx != -1 && my != -1) rasterizer.rasterize(mx, my, e.getX(), e.getY());
+                clear(0xaaaaaa);
 
-				rasterizer.redraw(lines);
-				polygonRasterizer.rasterize(pl);
-				panel.repaint();
+                if (lastAction.equals("polygon") && pl.getPoints().size() > 1) { // propojení nejstaršího bodu s počátkem
+                    rasterizer.rasterize(new Line(new Point(e.getX(), e.getY()), start, Color.CYAN.getRGB()));
+                }
 
-			}
+                if (lastAction.equals("polygon") && x != 0 && y != 0)
+                    rasterizer.rasterize(x, y, e.getX(), e.getY()); // vodící čára pro polygon
+                if (lastAction.equals("line") && mx != -1 && my != -1)
+                    rasterizer.rasterize(mx, my, e.getX(), e.getY()); // vodící čára pro úsečku
+
+                rasterizer.redraw(lines); // znovu vykreslení úseček
+                polygonRasterizer.rasterize(pl); // znovu vykreslení polygonu
+                panel.repaint();
+
+            }
 		});
 
 
 		panel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				if (panel.getWidth() < 1 || panel.getHeight() < 1)
-					return;
-				if (panel.getWidth() <= raster.getWidth() && panel.getHeight() <= raster.getHeight()) //no resize if new one is smaller
-					return;
-				RasterBufferedImage newRaster = new RasterBufferedImage(panel.getWidth(), panel.getHeight());
-				newRaster.draw(raster);
-				raster = newRaster;
-				rasterizer = new FilledLineRasterizer(raster);
-				dashedRasterizer = new DashedLineRasterizer(raster);
-				polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
-			}
+                if (panel.getWidth() < 1 || panel.getHeight() < 1)
+                    return;
+                if (panel.getWidth() <= raster.getWidth() && panel.getHeight() <= raster.getHeight()) //no resize if new one is smaller
+                    return;
+                RasterBufferedImage newRaster = new RasterBufferedImage(panel.getWidth(), panel.getHeight());
+                newRaster.draw(raster);
+                raster = newRaster;
+                rasterizer = new FilledLineRasterizer(raster);
+                dashedRasterizer = new DashedLineRasterizer(raster, pl);
+                polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
+            }
 		});
 
 	}
