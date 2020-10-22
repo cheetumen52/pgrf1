@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * @version 2020
  */
 
-public class Polygon {
+public class Main {
 
 	private JPanel panel;
 	private RasterBufferedImage raster;
@@ -28,6 +28,9 @@ public class Polygon {
 	private int y;
 	private int x2;
 	private int y2;
+	private boolean leadLine = true;
+	private Point nearest;
+	private boolean edit = false; // rozhodujicí proměnná pro editaci bodu
 	private String lastAction = "";
 	private ArrayList<Line> lines = new ArrayList<>();
 	private Point start, last;
@@ -36,17 +39,17 @@ public class Polygon {
 	private DashedLineRasterizer dashedRasterizer;
 	private PolygonRasterizer polygonRasterizer;
 
-	public Polygon(int width, int height) {
-        JFrame frame = new JFrame();
+	public Main(int width, int height) {
+		JFrame frame = new JFrame();
 
-        frame.setLayout(new BorderLayout());
+		frame.setLayout(new BorderLayout());
 
-        frame.setTitle("UHK FIM PGRF : " + this.getClass().getName());
-        frame.setResizable(true);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setTitle("UHK FIM PGRF : " + this.getClass().getName());
+		frame.setResizable(true);
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        raster = new RasterBufferedImage(width, height);
-        rasterizer = new FilledLineRasterizer(raster);
+		raster = new RasterBufferedImage(width, height);
+		rasterizer = new FilledLineRasterizer(raster);
         dashedRasterizer = new DashedLineRasterizer(raster, pl);
         polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
 
@@ -107,15 +110,35 @@ public class Polygon {
 				}
 
 				if (e.getButton() == MouseEvent.BUTTON3) {
-					//TODO
+					lastAction = "edit";
+					if (!edit) {
+						int nx = e.getX();
+						int ny = e.getY();
+						double temp = 9999999; // init hodnota, k zamezení chyby v podmínce pro porovnání
+						if (pl.getPoints().size() > 1) {
+							for (Point nearestPoint : pl.getPoints()) {
+								if (nearestPoint.getDistance(nx, ny) < temp) {
+									temp = nearestPoint.getDistance(nx, ny);
+									nearest = nearestPoint;
+								}
+							}
+						}
+						edit = true;
+					} else {
+						nearest.setX(e.getX());
+						nearest.setY(e.getY());
+						clear(0xaaaaaa);
+						redrawAll();
+						edit = false;
+					}
+
 				}
-				panel.repaint();
 			}
 
 			public void mouseReleased(MouseEvent e) {
 				if (e.getButton() == MouseEvent.BUTTON1) {
 					if (pl.getPoints().size() > 1) {
-						Line ln = new Line(start, last, 0xff0000);
+						Line ln = new Line(start, last, 0xff0000); // propojeni prvniho a posledniho bodu - mimo polygon rasterizer
 						dashedRasterizer.rasterize(ln);
 					}
 				}
@@ -126,19 +149,24 @@ public class Polygon {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_C) {
-                    clear(0xaaaaaa);
-                    pl = new model.Polygon();
-                    lines = new ArrayList<>();
-                    x = 0;
-                    y = 0;
-                    mx = -1;
-                    my = -1;
-                    first = true;
-                    start = null;
-                    last = null;
-                    lastAction = "";
-                    panel.repaint();
-                }
+					clear(0xaaaaaa);
+					pl = new model.Polygon();
+					dashedRasterizer = new DashedLineRasterizer(raster, pl);
+					polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
+					lines = new ArrayList<>();
+					x = 0;
+					y = 0;
+					mx = -1;
+					my = -1;
+					first = true;
+					start = null;
+					last = null;
+					nearest = null;
+					edit = false;
+					lastAction = "";
+					panel.repaint();
+				}
+				if (e.getKeyCode() == KeyEvent.VK_L) leadLine = !leadLine;
 			}
 		});
 
@@ -146,24 +174,19 @@ public class Polygon {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 
-                clear(0xaaaaaa);
+				clear(0xaaaaaa);
 
-                if (lastAction.equals("polygon") && pl.getPoints().size() > 1) { // propojení nejstaršího bodu s počátkem
-                    rasterizer.rasterize(new Line(new Point(e.getX(), e.getY()), start, Color.CYAN.getRGB()));
-                }
+				if (lastAction.equals("polygon") && pl.getPoints().size() > 1 && leadLine) { // propojení nejstaršího bodu s počátkem - vodící
+					rasterizer.rasterize(new Line(new Point(e.getX(), e.getY()), start, Color.CYAN.getRGB()));
+				}
 
-                if (lastAction.equals("polygon") && x != 0 && y != 0)
-                    rasterizer.rasterize(x, y, e.getX(), e.getY()); // vodící čára pro polygon
-                if (lastAction.equals("line") && mx != -1 && my != -1)
-                    rasterizer.rasterize(mx, my, e.getX(), e.getY()); // vodící čára pro úsečku
-
-                rasterizer.redraw(lines); // znovu vykreslení úseček
-                polygonRasterizer.rasterize(pl); // znovu vykreslení polygonu
-                panel.repaint();
-
-            }
+				if (lastAction.equals("polygon") && x != 0 && y != 0 && leadLine)
+					rasterizer.rasterize(x, y, e.getX(), e.getY()); // vodící čára pro polygon
+				if (lastAction.equals("line") && mx != -1 && my != -1)
+					rasterizer.rasterize(mx, my, e.getX(), e.getY()); // vodící čára pro úsečku
+				redrawAll();
+			}
 		});
-
 
 		panel.addComponentListener(new ComponentAdapter() {
 			@Override
@@ -174,23 +197,29 @@ public class Polygon {
                     return;
                 RasterBufferedImage newRaster = new RasterBufferedImage(panel.getWidth(), panel.getHeight());
                 newRaster.draw(raster);
-                raster = newRaster;
-                rasterizer = new FilledLineRasterizer(raster);
-                dashedRasterizer = new DashedLineRasterizer(raster, pl);
-                polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
-            }
+				raster = newRaster;
+				rasterizer = new FilledLineRasterizer(raster);
+				dashedRasterizer = new DashedLineRasterizer(raster, pl);
+				polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
+			}
 		});
 
 	}
 
 	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> new Polygon(800, 600).start());
+		SwingUtilities.invokeLater(() -> new Main(800, 600).start());
+	}
+
+	private void redrawAll() {
+		rasterizer.redraw(lines); // znovu vykreslení úseček
+		polygonRasterizer.rasterize(pl); // znovu vykreslení polygonu
+		panel.repaint();
 	}
 
 	public void clear(int color) {
 		raster.setClearColor(color);
 		raster.clear();
-		raster.getGraphics().drawString("Use mouse buttons and try resize the window", 5, 15);
+		raster.getGraphics().drawString("LMB - Polygon add points, RMB - Edit nearest polygon points, MMB - Make line", 5, 15);
 	}
 
 	public void present(Graphics graphics) {
@@ -199,7 +228,7 @@ public class Polygon {
 
 	public void start() {
 		clear(0xaaaaaa);
-		raster.getGraphics().drawString("Use mouse buttons and try resize the window", 5, 15);
+		raster.getGraphics().drawString("LMB - Polygon add points, RMB - Edit nearest polygon points, MMB - Make line", 5, 15);
 		panel.repaint();
 	}
 

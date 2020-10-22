@@ -21,7 +21,7 @@ public class DashedLineRasterizer extends LineRasterizer {
         sx = (x1 + x2) / 2;
         sy = (y1 + y2) / 2;
 
-        for (Point p : pl.getPoints()) { // vykreslení počátků a konečných bodů - lepší řešení mě nenapadlo
+        for (Point p : pl.getPoints()) { // vykreslení počátků a konečných bodů - nejsou mezery v počátku a na konci - lepší řešení mě nenapadlo
             raster.setPixel(p.getX(), p.getY(), this.getColor().getRGB());
         }
         if (i % 8 < 4) {
