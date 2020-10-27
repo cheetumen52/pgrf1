@@ -1,11 +1,13 @@
-package model;
+package clip;
 
-public class Line {
+import model.Point;
 
-    private final int x1, x2, y1, y2;
+class Line {
+
+    private final double x1, x2, y1, y2;
     private final int color;
 
-    public Line(int x1, int y1, int x2, int y2, int color) {
+    public Line(double x1, double y1, double x2, double y2, int color) {
         this.x1 = x1;
         this.x2 = x2;
         this.y1 = y1;
@@ -21,23 +23,23 @@ public class Line {
         this.color = color;
     }
 
-    public int getX1() {
+    public double getX1() {
         return x1;
     }
 
-    public int getX2() {
+    public double getX2() {
         return x2;
     }
 
-    public int getY1() {
+    public double getY1() {
         return y1;
     }
 
-    public int getY2() {
+    public double getY2() {
         return y2;
     }
 
-    public int getColor() {
+    public double getColor() {
         return color;
     }
 
@@ -46,8 +48,8 @@ public class Line {
     }
 
     public Line setOrientation() {
-        if (y1 > y2) {
-            return new Line(new Point(x1, y2), new Point(x2, y1), 0xff0000);
+        if (y2 > y1) {
+
         }
         return this;
     }
@@ -57,7 +59,7 @@ public class Line {
         return y == y1 || y == y2;
     }
 
-    public int getIntersection(int y) {
+    public double getIntersection(int y) {
         if (y == y1) {
             return x1;
         } else {
