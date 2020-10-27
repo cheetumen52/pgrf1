@@ -2,7 +2,6 @@ package rasterize;
 
 import model.Line;
 import model.Point;
-import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 
@@ -27,7 +26,7 @@ public abstract class LineRasterizer {
         this.color = new Color(color);
     }
 
-    public void rasterize(@NotNull Line line) {
+    public void rasterize(Line line) {
         setColor(line.getColor());
         drawLine(line.getX1(), line.getY1(), line.getX2(), line.getY2());
     }

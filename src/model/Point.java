@@ -24,14 +24,14 @@ public class Point {
         this.y = y;
     }
 
-    public double getDistance(int xs, int ys) {
+    public double getDistance(int xs, int ys) { // výpočet vzdálenosti mezi souřadnicemi bodů - input = souřadnice bodu k výpočtu
         double distance;
         distance = Math.sqrt(Math.pow((xs - x), 2) + Math.pow((ys - y), 2));
         return distance;
     }
 
     @Override
-    public String toString() {
+    public String toString() { // Vypíše info o bodu
         return "Point{" +
                 "x=" + x +
                 ", y=" + y +
