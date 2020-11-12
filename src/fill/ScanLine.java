@@ -1,8 +1,9 @@
 package fill;
 
 import model.Line;
+import model.Point;
 import model.Polygon;
-import rasterize.Raster;
+import rasterize.LineRasterizer;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -10,20 +11,21 @@ import java.util.List;
 
 public class ScanLine implements Filler {
 
+    int temp = -1;
     private Polygon pl;
     private Color fillColor;
     private Color borderColor;
-    private Raster raster;
+    private LineRasterizer lineRasterizer;
 
-    public ScanLine(Raster raster) {
-        this.raster = raster;
+    public ScanLine(LineRasterizer lineRasterizer) {
+        this.lineRasterizer = lineRasterizer;
     }
 
     private void process() {
         List<Line> lines = new ArrayList<>();
         List<Integer> xArray = new ArrayList<>();
         int yMin = 0, yMax = 0;
-        for (int i = 0; i < pl.getPoints().size(); i++) {
+        for (int i = 0; i < pl.getPoints().size() - 1; i++) {
             Line line = new Line(pl.getPoints().get(i), pl.getPoints().get(i + 1), 0xff0000);
             if (!line.isHorizontal()) {
                 lines.add(line.setOrientation());
@@ -45,7 +47,12 @@ public class ScanLine implements Filler {
             }
             xArray = sortXArray(xArray);
             for (Integer x : xArray) {
-                raster.setPixel(x, y, 0xff0000);
+                if (temp == -1) {
+                    temp = x;
+                } else {
+                    lineRasterizer.rasterize(new Point(temp, y), new Point(x, y));
+                    temp = -1;
+                }
             }
         }
     }
@@ -68,7 +75,12 @@ public class ScanLine implements Filler {
 
     @Override
     public void fill() {
-
+        if (pl != null) {
+            process();
+        } else {
+            System.out.println("Je třeba nastavit polygon pomocí .setPolygon()");
+            return;
+        }
     }
 
     public void setPolygon(Polygon pl) {

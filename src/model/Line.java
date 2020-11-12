@@ -46,8 +46,8 @@ public class Line {
     }
 
     public Line setOrientation() {
-        if (y1 > y2) {
-            return new Line(new Point(x1, y2), new Point(x2, y1), 0xff0000);
+        if (y1 < y2) {
+            return new Line(new Point(x2, y2), new Point(x1, y1), 0xff0000);
         }
         return this;
     }
