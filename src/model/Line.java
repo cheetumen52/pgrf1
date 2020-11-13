@@ -46,23 +46,17 @@ public class Line {
     }
 
     public Line setOrientation() {
-        if (y1 < y2) {
+        if (y1 > y2)
             return new Line(new Point(x2, y2), new Point(x1, y1), 0xff0000);
-        }
         return this;
     }
 
     public boolean isIntersection(int y) {
-        //TODO I GUESS
-        return y == y1 || y == y2;
+        return (y >= y1) && (y < y2);
     }
 
     public int getIntersection(int y) {
-        if (y == y1) {
-            return x1;
-        } else {
-            return x2;
-        }
-
+        double k = ((double) (x2 - x1)) / ((y2 - y1));
+        return (int) Math.round(k * y + (x1 - k * y1));
     }
 }

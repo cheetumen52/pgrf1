@@ -13,7 +13,7 @@ public class ScanLine implements Filler {
 
     int temp = -1;
     private Polygon pl;
-    private Color fillColor;
+    private Color fillColor = Color.pink;
     private Color borderColor;
     private LineRasterizer lineRasterizer;
 
@@ -24,20 +24,20 @@ public class ScanLine implements Filler {
     private void process() {
         List<Line> lines = new ArrayList<>();
         List<Integer> xArray = new ArrayList<>();
-        int yMin = 0, yMax = 0;
+        int yMin = -1, yMax = -1;
         for (int i = 0; i < pl.getPoints().size() - 1; i++) {
             Line line = new Line(pl.getPoints().get(i), pl.getPoints().get(i + 1), 0xff0000);
             if (!line.isHorizontal()) {
                 lines.add(line.setOrientation());
-                if (line.getY1() > line.getY2()) {
-                    yMax = line.getY1();
-                    yMin = line.getY2();
-                } else {
-                    yMax = line.getY2();
-                    yMin = line.getY1();
-                }
+                if (yMin == -1) yMin = line.getY2();
+                if (yMax == -1) yMax = line.getY1();
+                if (yMin > line.getY2()) yMin = line.getY1();
+                if (yMax < line.getY1()) yMax = line.getY2();
             }
         }
+
+        System.out.println("Max: " + yMax + " Min: " + yMin);
+        /*
         for (int y = yMin; y <= yMax; y++) {
             for (Line lineY : lines) {
                 if (lineY.isIntersection(y)) {
@@ -46,12 +46,23 @@ public class ScanLine implements Filler {
                 }
             }
             xArray = sortXArray(xArray);
-            for (Integer x : xArray) {
-                if (temp == -1) {
-                    temp = x;
-                } else {
-                    lineRasterizer.rasterize(new Point(temp, y), new Point(x, y));
-                    temp = -1;
+            for(int w = 0; w<xArray.size();w++){
+                if(w%2==0) lineRasterizer.rasterize(new Line(xArray.get(w),y,xArray.get(w+1),y,fillColor.getRGB()));
+            }
+        }
+        */
+
+        for (int y = yMin; y < yMax; y++) {
+            for (Line lineY : lines) {
+                if (lineY.isIntersection(y)) {
+                    System.out.println(lineY.getIntersection(y));
+                    xArray.add(lineY.getIntersection(y));
+                }
+            }
+            xArray = sortXArray(xArray);
+            for (int i = 0; i < xArray.size(); i += 2) {
+                if (xArray.size() > i + 1) {
+                    lineRasterizer.rasterize(new Line(new Point(xArray.get(i), y), new Point(xArray.get(i + 1), y), fillColor.getRGB()));
                 }
             }
         }

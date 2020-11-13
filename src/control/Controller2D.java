@@ -2,28 +2,41 @@ package control;
 
 import fill.ScanLine;
 import fill.SeedFill;
+import fill.SeedFillBorder;
 import model.Line;
 import model.Point;
+import model.Polygon;
+import rasterize.LineRasterizer;
 import rasterize.LineRasterizerGraphics;
+import rasterize.PolygonRasterizer;
 import rasterize.Raster;
 import view.Panel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class Controller2D implements Controller {
 
     private final Panel panel;
 
     private int x, y;
-    private LineRasterizerGraphics rasterizer;
+    boolean ctrlDown = false;
+    boolean shiftDown = false;
     private SeedFill seedFill;
     private ScanLine scanline;
+    private LineRasterizer rasterizer;
+    private SeedFillBorder seedFillBorder;
     private boolean first = true;
     private int x2;
     private int y2;
+    private boolean leadLine = true;
+    private ArrayList<Line> lines = new ArrayList<>();
     private Point start, last;
-    private model.Polygon pl = new model.Polygon();
+
+    private Polygon pl = new Polygon();
+    private PolygonRasterizer polygonRasterizer;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -35,6 +48,10 @@ public class Controller2D implements Controller {
         seedFill = new SeedFill(raster);
         rasterizer = new LineRasterizerGraphics(raster);
         scanline = new ScanLine(rasterizer);
+        pl = new Polygon();
+        polygonRasterizer = new PolygonRasterizer(rasterizer);
+        polygonRasterizer.setColor(0x00ff00);
+        seedFillBorder = new SeedFillBorder(raster);
     }
 
     @Override
@@ -44,11 +61,10 @@ public class Controller2D implements Controller {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isControlDown()) {
-                    scanline.fill();
+                    ctrlDown = !ctrlDown;
                 }
-
                 if (e.isShiftDown()) {
-                    //TODO
+                    shiftDown = !shiftDown;
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
                     if (first) { // první bod v polygonu
                         x = e.getX();
@@ -67,12 +83,24 @@ public class Controller2D implements Controller {
                         y = y2;
                         pl.addPoints(p);
                     }
+                    update();
                 } else if (SwingUtilities.isMiddleMouseButton(e)) {
-                    scanline.setPolygon(pl);
-                    scanline.fill();
+                    if (ctrlDown) {
+                        pl.addStartPoint(start, pl.getPoints().size());
+                        scanline.setPolygon(pl);
+                        scanline.fill();
+                        pl.getPoints().remove(pl.getPoints().size() - 1);
+                    }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    seedFill.setSeed(new Point(e.getX(), e.getY()));
-                    seedFill.fill();
+                    if (ctrlDown) {
+                        seedFill.setSeed(new Point(e.getX(), e.getY()));
+                        seedFill.fill();
+                    } else {
+                        seedFillBorder.setFillColor(0x0000ff);
+                        seedFillBorder.setBorderColor(start);
+                        seedFillBorder.setSeed(new Point(e.getX(), e.getY()));
+                        seedFillBorder.fill();
+                    }
                 }
             }
 
@@ -96,7 +124,13 @@ public class Controller2D implements Controller {
                 if (e.isShiftDown()) {
                     //TODO
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
-                    //TODO
+                    if (pl.getPoints().size() > 1 && leadLine) { // propojení nejstaršího bodu s počátkem - vodící
+                        rasterizer.rasterize(new Line(new Point(e.getX(), e.getY()), start, Color.CYAN.getRGB()));
+                    }
+
+                    if (x != 0 && y != 0 && leadLine)
+                        rasterizer.rasterize(x, y, e.getX(), e.getY()); // vodící čára pro polygon
+                    update();
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     //TODO
                 } else if (SwingUtilities.isMiddleMouseButton(e)) {
@@ -126,7 +160,9 @@ public class Controller2D implements Controller {
     }
 
     private void update() {
-//        panel.clear();
+        panel.clear();
+        polygonRasterizer.rasterize(pl); // znovu vykreslení polygonu
+        panel.repaint();
         //TODO
         /*
         Point origin = new Point(0,0);
@@ -145,6 +181,7 @@ public class Controller2D implements Controller {
 
     private void hardClear() {
         panel.clear();
+        initObjects(panel.getRaster());
     }
 
 }

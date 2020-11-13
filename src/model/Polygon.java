@@ -8,6 +8,7 @@ public class Polygon {
     public Polygon() {
         points = new ArrayList<>();
     }
+
     public ArrayList<Point> getPoints() {
         return points;
     }
@@ -16,4 +17,7 @@ public class Polygon {
         points.add(pl);
     } // přidání bodů do polygonu
 
+    public void addStartPoint(Point pl, int index) {
+        points.add(index, pl);
+    }
 }
