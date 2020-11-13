@@ -36,22 +36,6 @@ public class ScanLine implements Filler {
             }
         }
 
-        System.out.println("Max: " + yMax + " Min: " + yMin);
-        /*
-        for (int y = yMin; y <= yMax; y++) {
-            for (Line lineY : lines) {
-                if (lineY.isIntersection(y)) {
-                    int x = lineY.getIntersection(y);
-                    xArray.add(x);
-                }
-            }
-            xArray = sortXArray(xArray);
-            for(int w = 0; w<xArray.size();w++){
-                if(w%2==0) lineRasterizer.rasterize(new Line(xArray.get(w),y,xArray.get(w+1),y,fillColor.getRGB()));
-            }
-        }
-        */
-
         for (int y = yMin; y < yMax; y++) {
             xArray.clear();
             for (Line lineY : lines) {
