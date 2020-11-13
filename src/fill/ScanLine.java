@@ -31,8 +31,8 @@ public class ScanLine implements Filler {
                 lines.add(line.setOrientation());
                 if (yMin == -1) yMin = line.getY2();
                 if (yMax == -1) yMax = line.getY1();
-                if (yMin > line.getY2()) yMin = line.getY1();
-                if (yMax < line.getY1()) yMax = line.getY2();
+                if (yMin > line.getY2()) yMin = line.getY2();
+                if (yMax < line.getY1()) yMax = line.getY1();
             }
         }
 
@@ -53,10 +53,11 @@ public class ScanLine implements Filler {
         */
 
         for (int y = yMin; y < yMax; y++) {
+            xArray.clear();
             for (Line lineY : lines) {
                 if (lineY.isIntersection(y)) {
-                    System.out.println(lineY.getIntersection(y));
-                    xArray.add(lineY.getIntersection(y));
+                    int x = lineY.getIntersection(y);
+                    xArray.add(x);
                 }
             }
             xArray = sortXArray(xArray);
