@@ -50,7 +50,7 @@ public class Clipper {
         double y1 = edge.getY1();
         double y2 = edge.getY2();
         double distance = Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - y1, 2));
-        return distance >= 0;
+        return distance > 0;
     }
 
     private static void getEdges(Polygon clipper) {

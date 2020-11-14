@@ -89,11 +89,14 @@ public class Controller2D implements Controller {
                         update();
                     }
                     if (SwingUtilities.isRightMouseButton(e)) {
-                        Polygon clipped = new Polygon(0x00ffff);
-                        clipped = Clipper.clip(pl, plClipper);
+                        pl.addStartPoint(start, pl.getPoints().size());
+                        plClipper.addStartPoint(startClipper, plClipper.getPoints().size());
+                        Polygon clipped = Clipper.clip(pl, plClipper);
                         scanline.setPolygon(clipped);
                         scanline.setFillColor(new Color(0x00ffff));
                         scanline.fill();
+                        pl.getPoints().remove(pl.getPoints().size() - 1);
+                        plClipper.getPoints().remove(plClipper.getPoints().size() - 1);
                     }
 
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
