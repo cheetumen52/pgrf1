@@ -43,28 +43,4 @@ class Line {
         return color;
     }
 
-    public boolean isHorizontal() {
-        return y1 == y2;
-    }
-
-    public Line setOrientation() {
-        if (y2 > y1) {
-
-        }
-        return this;
-    }
-
-    public boolean isIntersection(int y) {
-        //TODO I GUESS
-        return y == y1 || y == y2;
-    }
-
-    public double getIntersection(int y) {
-        if (y == y1) {
-            return x1;
-        } else {
-            return x2;
-        }
-
-    }
 }

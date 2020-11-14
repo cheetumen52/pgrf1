@@ -1,5 +1,6 @@
 package control;
 
+import clip.Clipper;
 import fill.ScanLine;
 import fill.SeedFill;
 import fill.SeedFillBorder;
@@ -15,28 +16,26 @@ import view.Panel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 
 public class Controller2D implements Controller {
 
     private final Panel panel;
 
-    private int x, y;
-    boolean ctrlDown = false;
-    boolean shiftDown = false;
+    private int x, y, x2, y2, x3, y3, x4, y4;
     private SeedFill seedFill;
     private ScanLine scanline;
     private LineRasterizer rasterizer;
     private SeedFillBorder seedFillBorder;
     private boolean first = true;
-    private int x2;
-    private int y2;
     private boolean leadLine = true;
-    private ArrayList<Line> lines = new ArrayList<>();
     private Point start, last;
 
-    private Polygon pl = new Polygon();
+    private Polygon pl = new Polygon(0xff0000);
     private PolygonRasterizer polygonRasterizer;
+    private Polygon plClipper = new Polygon(0xffff00);
+    private boolean firstClipper = true;
+    private Point startClipper;
+    private Point lastClipper;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -48,9 +47,9 @@ public class Controller2D implements Controller {
         seedFill = new SeedFill(raster);
         rasterizer = new LineRasterizerGraphics(raster);
         scanline = new ScanLine(rasterizer);
-        pl = new Polygon();
+        pl = new Polygon(0xff0000);
+        plClipper = new Polygon(0xffff00);
         polygonRasterizer = new PolygonRasterizer(rasterizer);
-        polygonRasterizer.setColor(0x00ff00);
         seedFillBorder = new SeedFillBorder(raster);
     }
 
@@ -61,10 +60,42 @@ public class Controller2D implements Controller {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.isControlDown()) {
-                    ctrlDown = !ctrlDown;
+                    if (SwingUtilities.isMiddleMouseButton(e)) {
+                        seedFillBorder.setFillColor(0x0000ff);
+                        seedFillBorder.setBorderColor(start);
+                        seedFillBorder.setSeed(new Point(e.getX(), e.getY()));
+                        seedFillBorder.fill();
+                    }
                 }
                 if (e.isShiftDown()) {
-                    shiftDown = !shiftDown;
+                    if (SwingUtilities.isLeftMouseButton(e)) {
+                        if (firstClipper) {
+                            x3 = e.getX();
+                            y3 = e.getY();
+                            Point p = new Point(x3, y3);
+                            startClipper = p;
+                            plClipper.addPoints(p);
+                            firstClipper = !firstClipper;
+                        } else {
+                            x4 = e.getX();
+                            y4 = e.getY();
+                            Point p = new Point(x4, y4);
+                            lastClipper = p; // poslední vykreslený bod
+                            rasterizer.rasterize(new Line(x3, y3, x4, y4));
+                            x3 = x4; // napojení předchozího bodu s novým
+                            y3 = y4;
+                            plClipper.addPoints(p);
+                        }
+                        update();
+                    }
+                    if (SwingUtilities.isRightMouseButton(e)) {
+                        Polygon clipped = new Polygon(0x00ffff);
+                        clipped = Clipper.clip(pl, plClipper);
+                        scanline.setPolygon(clipped);
+                        scanline.setFillColor(new Color(0x00ffff));
+                        scanline.fill();
+                    }
+
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
                     if (first) { // první bod v polygonu
                         x = e.getX();
@@ -72,35 +103,26 @@ public class Controller2D implements Controller {
                         Point p = new Point(x, y);
                         start = p; // potřeba dočasně uložit tento bod
                         pl.addPoints(p);
-                        first = false;
+                        first = !first;
                     } else {
                         x2 = e.getX();
                         y2 = e.getY();
                         Point p = new Point(x2, y2);
                         last = p; // poslední vykreslený bod
-                        rasterizer.rasterize(new Line(x, y, x2, y2, 0xff0000));
+                        rasterizer.rasterize(new Line(x, y, x2, y2));
                         x = x2; // napojení předchozího bodu s novým
                         y = y2;
                         pl.addPoints(p);
                     }
                     update();
                 } else if (SwingUtilities.isMiddleMouseButton(e)) {
-                    if (ctrlDown) {
-                        pl.addStartPoint(start, pl.getPoints().size());
-                        scanline.setPolygon(pl);
-                        scanline.fill();
-                        pl.getPoints().remove(pl.getPoints().size() - 1);
-                    }
+                    seedFill.setSeed(new Point(e.getX(), e.getY()));
+                    seedFill.fill();
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    if (ctrlDown) {
-                        seedFill.setSeed(new Point(e.getX(), e.getY()));
-                        seedFill.fill();
-                    } else {
-                        seedFillBorder.setFillColor(0x0000ff);
-                        seedFillBorder.setBorderColor(start);
-                        seedFillBorder.setSeed(new Point(e.getX(), e.getY()));
-                        seedFillBorder.fill();
-                    }
+                    pl.addStartPoint(start, pl.getPoints().size());
+                    scanline.setPolygon(pl);
+                    scanline.fill();
+                    pl.getPoints().remove(pl.getPoints().size() - 1);
                 }
             }
 
@@ -162,21 +184,8 @@ public class Controller2D implements Controller {
     private void update() {
         panel.clear();
         polygonRasterizer.rasterize(pl); // znovu vykreslení polygonu
+        polygonRasterizer.rasterize(plClipper);
         panel.repaint();
-        //TODO
-        /*
-        Point origin = new Point(0,0);
-        Point vectorX = new Point(1,0);
-        Point vectorY = new Point(0,1);
-        Line lineH = new Line(origin,vectorX,0xFF);
-        Line lineV = new Line(origin,vectorX,0xFF);
-
-        origin = origin.withY(10);
-        //origin.x = 10;
-        Line line = new Line(origin,new Point(1,2,0xFF);
-
-        Polygon p3 = Clipper.clip(p1,p2); -> rasterize pomocí ScanLine
-         */
     }
 
     private void hardClear() {

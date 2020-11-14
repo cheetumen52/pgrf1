@@ -28,7 +28,7 @@ public class Main {
     private String lastAction = ""; // proměnná pro poslední akci - pohyblivá čára atd.
     private ArrayList<Line> lines = new ArrayList<>();
     private Point start, last;
-    private model.Polygon pl = new model.Polygon();
+    private model.Polygon pl = new model.Polygon(0xff0000);
     private FilledLineRasterizer rasterizer;
     private DashedLineRasterizer dashedRasterizer;
     private PolygonRasterizer polygonRasterizer;
@@ -140,7 +140,7 @@ public class Main {
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_C) { //vynulování/smazání celého rasteru
                     clear(0xaaaaaa);
-                    pl = new model.Polygon();
+                    pl = new model.Polygon(0xff0000);
                     dashedRasterizer = new DashedLineRasterizer(raster, pl);
                     polygonRasterizer = new PolygonRasterizer(dashedRasterizer);
                     lines = new ArrayList<>();

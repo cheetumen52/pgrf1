@@ -30,8 +30,8 @@ public class SeedFillBorder implements Filler {
                 if (raster.getPixel(seed.getX(), seed.getY()) != borderColor && raster.getPixel(seed.getX(), seed.getY()) != fillColor) {
                     raster.setPixel(seed.getX(), seed.getY(), fillColor);
                     seedFill(new Point(seed.getX() + 1, seed.getY()), fillColor, borderColor);
-                    seedFill(new Point(seed.getX(), seed.getY() + 1), fillColor, borderColor);
                     seedFill(new Point(seed.getX() - 1, seed.getY()), fillColor, borderColor);
+                    seedFill(new Point(seed.getX(), seed.getY() + 1), fillColor, borderColor);
                     seedFill(new Point(seed.getX(), seed.getY() - 1), fillColor, borderColor);
                 }
 

@@ -6,18 +6,10 @@ import model.Polygon;
 
 public class PolygonRasterizer {
     LineRasterizer lr;
-    private int color = 0xff0000;
+
 
     public PolygonRasterizer(LineRasterizer lr) {
         this.lr = lr;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public void setColor(int color) {
-        this.color = color;
     }
 
     public void rasterize(Polygon polygon) {
@@ -25,7 +17,7 @@ public class PolygonRasterizer {
             if (i + 1 < polygon.getPoints().size()) {
                 Point p1 = polygon.getPoints().get(i);
                 Point p2 = polygon.getPoints().get(i + 1);
-                Line line = new Line(p1, p2, color);
+                Line line = new Line(p1, p2, polygon.getColor());
                 lr.rasterize(line);
             }
         }
