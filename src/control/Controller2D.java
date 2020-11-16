@@ -27,9 +27,10 @@ public class Controller2D implements Controller {
     private LineRasterizer rasterizer;
     private SeedFillBorder seedFillBorder;
     private boolean first = true;
-    private boolean leadLine = true;
+    private boolean editClipper = true;
     private Point start, last;
-
+    private Point nearest;
+    private boolean edit = false; // rozhodujicí proměnná pro editaci bodu
     private Polygon pl = new Polygon(0xff0000);
     private PolygonRasterizer polygonRasterizer;
     private Polygon plClipper = new Polygon(0xffff00);
@@ -53,6 +54,8 @@ public class Controller2D implements Controller {
         seedFillBorder = new SeedFillBorder(raster);
         firstClipper = true;
         first = true;
+        edit = false;
+
     }
 
     @Override
@@ -60,7 +63,7 @@ public class Controller2D implements Controller {
         panel.addMouseListener(new MouseAdapter() {
 
             @Override
-            public void mousePressed(MouseEvent e) {
+            public void mouseReleased(MouseEvent e) {
                 if (e.isControlDown()) {
                     if (SwingUtilities.isMiddleMouseButton(e)) {
                         seedFillBorder.setFillColor(0x0000ff);
@@ -102,6 +105,36 @@ public class Controller2D implements Controller {
                     }
                     if (SwingUtilities.isRightMouseButton(e)) {
 
+                        if (!edit) { // určení nejbližšího bodu
+                            int nx = e.getX();
+                            int ny = e.getY();
+                            double temp = 99999999; // init hodnota, k zamezení chyby v podmínce pro porovnání
+                            if (!editClipper) {
+                                if (pl.getPoints().size() > 1) { // vyhledání nejbližšího bodu pomocí getDistance();
+                                    for (Point nearestPoint : pl.getPoints()) {
+                                        if (nearestPoint.getDistance(nx, ny) < temp) {
+                                            temp = nearestPoint.getDistance(nx, ny);
+                                            nearest = nearestPoint;
+                                        }
+                                    }
+                                }
+                            } else {
+                                if (plClipper.getPoints().size() > 1) { // vyhledání nejbližšího bodu pomocí getDistance();
+                                    for (Point nearestPoint : plClipper.getPoints()) {
+                                        if (nearestPoint.getDistance(nx, ny) < temp) {
+                                            temp = nearestPoint.getDistance(nx, ny);
+                                            nearest = nearestPoint;
+                                        }
+                                    }
+                                }
+                            }
+                            edit = true; // vyhození do else
+                        } else {
+                            nearest.setX(e.getX()); //přesunutí bodu
+                            nearest.setY(e.getY()); //přesunutí bodu
+                            update();
+                            edit = false;
+                        }
                     }
 
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
@@ -153,15 +186,9 @@ public class Controller2D implements Controller {
                 if (e.isControlDown()) return;
 
                 if (e.isShiftDown()) {
-                    //TODO
-                } else if (SwingUtilities.isLeftMouseButton(e)) {
-                    if (pl.getPoints().size() > 1 && leadLine) { // propojení nejstaršího bodu s počátkem - vodící
-                        rasterizer.rasterize(new Line(new Point(e.getX(), e.getY()), start, Color.CYAN.getRGB()));
-                    }
 
-                    if (x != 0 && y != 0 && leadLine)
-                        rasterizer.rasterize(x, y, e.getX(), e.getY()); // vodící čára pro polygon
-                    update();
+                } else if (SwingUtilities.isLeftMouseButton(e)) {
+
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     //TODO
                 } else if (SwingUtilities.isMiddleMouseButton(e)) {

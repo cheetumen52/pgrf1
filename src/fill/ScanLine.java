@@ -14,7 +14,6 @@ public class ScanLine implements Filler {
     int temp = -1;
     private Polygon pl;
     private Color fillColor = Color.pink;
-    private Color borderColor;
     private LineRasterizer lineRasterizer;
 
     public ScanLine(LineRasterizer lineRasterizer) {
@@ -71,8 +70,12 @@ public class ScanLine implements Filler {
 
     @Override
     public void fill() {
-        if (pl != null && pl.getPoints().size() > 2) {
-            process();
+        if (pl != null) {
+            if (pl.getPoints().size() > 2) {
+                process();
+            } else {
+                return;
+            }
         } else {
             System.out.println("Je třeba nastavit polygon pomocí .setPolygon()");
             return;

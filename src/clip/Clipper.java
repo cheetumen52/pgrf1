@@ -10,6 +10,7 @@ import java.util.List;
 public class Clipper {
     private static List<Line> clipperEdges = new ArrayList<>();
     public static Polygon clip(Polygon inputPolygon, Polygon clipperPoly) { //TODO return clipped polygon
+
         ArrayList<Point> output = new ArrayList<>();
         if (inputPolygon.getPoints().size() < 2) return inputPolygon;
         getEdges(clipperPoly);
