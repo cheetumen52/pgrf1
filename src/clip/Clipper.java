@@ -10,21 +10,23 @@ import java.util.List;
 public class Clipper {
     private static List<Line> clipperEdges = new ArrayList<>();
     public static Polygon clip(Polygon inputPolygon, Polygon clipperPoly) { //TODO return clipped polygon
+        ArrayList<Point> output = new ArrayList<>();
         if (inputPolygon.getPoints().size() < 2) return inputPolygon;
         getEdges(clipperPoly);
-        Polygon result = new Polygon();
         for (Line edge : clipperEdges) {
+            output.clear();
             Point v1 = inputPolygon.getPoints().get(inputPolygon.getPoints().size() - 1);
             for (Point v2 : inputPolygon.getPoints()) {
                 if (isInside(v2, edge)) {
-                    if (!isInside(v1, edge)) result.addPoints(intersection(v1, v2, edge));
-                    result.addPoints(v2);
+                    if (!isInside(v1, edge)) output.add(intersection(v1, v2, edge));
+                    output.add(v2);
                 } else {
-                    if (isInside(v1, edge)) result.addPoints(intersection(v1, v2, edge));
+                    if (isInside(v1, edge)) output.add(intersection(v1, v2, edge));
                 }
                 v1 = v2;
             }
         }
+        Polygon result = new Polygon(output);
         return result;
     }
 
@@ -51,7 +53,7 @@ public class Clipper {
         double x2 = edge.getX2();
         double y1 = edge.getY1();
         double y2 = edge.getY2();
-        return Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - y1, 2)) > 0.0;
+        return Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1) > 0.0;
 
     }
 

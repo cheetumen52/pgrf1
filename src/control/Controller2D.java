@@ -89,7 +89,7 @@ public class Controller2D implements Controller {
                             plClipper.addPoints(p);
                         }
                         update();
-                        if (plClipper.getPoints().size() > 1) {
+                        if (plClipper.getPoints().size() > 2) {
                             pl.addStartPoint(start, pl.getPoints().size());
                             plClipper.addStartPoint(startClipper, plClipper.getPoints().size());
                             Polygon clipped = Clipper.clip(pl, plClipper);

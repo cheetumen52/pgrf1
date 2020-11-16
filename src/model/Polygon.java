@@ -13,6 +13,11 @@ public class Polygon {
 
     public Polygon() {
         points = new ArrayList<>();
+        color = 0xff0000;
+    }
+
+    public Polygon(ArrayList<Point> in) {
+        points = in;
     }
 
 
