@@ -71,7 +71,7 @@ public class ScanLine implements Filler {
 
     @Override
     public void fill() {
-        if (pl != null) {
+        if (pl != null && pl.getPoints().size() > 2) {
             process();
         } else {
             System.out.println("Je třeba nastavit polygon pomocí .setPolygon()");

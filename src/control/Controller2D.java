@@ -51,6 +51,8 @@ public class Controller2D implements Controller {
         plClipper = new Polygon(0xffff00);
         polygonRasterizer = new PolygonRasterizer(rasterizer);
         seedFillBorder = new SeedFillBorder(raster);
+        firstClipper = true;
+        first = true;
     }
 
     @Override
@@ -87,16 +89,19 @@ public class Controller2D implements Controller {
                             plClipper.addPoints(p);
                         }
                         update();
+                        if (plClipper.getPoints().size() > 1) {
+                            pl.addStartPoint(start, pl.getPoints().size());
+                            plClipper.addStartPoint(startClipper, plClipper.getPoints().size());
+                            Polygon clipped = Clipper.clip(pl, plClipper);
+                            scanline.setPolygon(clipped);
+                            scanline.setFillColor(new Color(0x00ffff));
+                            scanline.fill();
+                            pl.getPoints().remove(pl.getPoints().size() - 1);
+                            plClipper.getPoints().remove(plClipper.getPoints().size() - 1);
+                        }
                     }
                     if (SwingUtilities.isRightMouseButton(e)) {
-                        pl.addStartPoint(start, pl.getPoints().size());
-                        plClipper.addStartPoint(startClipper, plClipper.getPoints().size());
-                        Polygon clipped = Clipper.clip(pl, plClipper);
-                        scanline.setPolygon(clipped);
-                        scanline.setFillColor(new Color(0x00ffff));
-                        scanline.fill();
-                        pl.getPoints().remove(pl.getPoints().size() - 1);
-                        plClipper.getPoints().remove(plClipper.getPoints().size() - 1);
+
                     }
 
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
@@ -124,6 +129,7 @@ public class Controller2D implements Controller {
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     pl.addStartPoint(start, pl.getPoints().size());
                     scanline.setPolygon(pl);
+                    scanline.setFillColor(new Color(0xffff00));
                     scanline.fill();
                     pl.getPoints().remove(pl.getPoints().size() - 1);
                 }
@@ -170,7 +176,7 @@ public class Controller2D implements Controller {
             public void keyPressed(KeyEvent e) {
                 // na klávesu C vymazat plátno
                 if (e.getKeyCode() == KeyEvent.VK_C) {
-                    //TODO
+                    hardClear();
                 }
             }
         });
