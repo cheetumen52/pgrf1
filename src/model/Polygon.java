@@ -37,8 +37,4 @@ public class Polygon {
         points.add(pl);
     } // přidání bodů do polygonu
 
-    public void addStartPoint(Point pl, int index) {
-        points.add(index, pl);
-    }
-
 }

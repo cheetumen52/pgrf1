@@ -28,6 +28,7 @@ public class Controller2D implements Controller {
     private SeedFillBorder seedFillBorder;
     private boolean first = true;
     private boolean editClipper = true;
+    private boolean plClipperEdit = true;
     private Point start, last;
     private Point nearest;
     private boolean edit = false; // rozhodujicí proměnná pro editaci bodu
@@ -55,7 +56,8 @@ public class Controller2D implements Controller {
         firstClipper = true;
         first = true;
         edit = false;
-
+        editClipper = true;
+        plClipperEdit = true;
     }
 
     @Override
@@ -93,8 +95,8 @@ public class Controller2D implements Controller {
                         }
                         update();
                         if (plClipper.getPoints().size() > 2) {
-                            pl.addStartPoint(start, pl.getPoints().size());
-                            plClipper.addStartPoint(startClipper, plClipper.getPoints().size());
+                            pl.addPoints(start);
+                            plClipper.addPoints(startClipper);
                             Polygon clipped = Clipper.clip(pl, plClipper);
                             scanline.setPolygon(clipped);
                             scanline.setFillColor(new Color(0x00ffff));
@@ -104,12 +106,11 @@ public class Controller2D implements Controller {
                         }
                     }
                     if (SwingUtilities.isRightMouseButton(e)) {
-
                         if (!edit) { // určení nejbližšího bodu
                             int nx = e.getX();
                             int ny = e.getY();
                             double temp = 99999999; // init hodnota, k zamezení chyby v podmínce pro porovnání
-                            if (!editClipper) {
+                            if (e.isShiftDown()) {
                                 if (pl.getPoints().size() > 1) { // vyhledání nejbližšího bodu pomocí getDistance();
                                     for (Point nearestPoint : pl.getPoints()) {
                                         if (nearestPoint.getDistance(nx, ny) < temp) {
@@ -126,12 +127,24 @@ public class Controller2D implements Controller {
                                             nearest = nearestPoint;
                                         }
                                     }
+                                    plClipperEdit = !plClipperEdit;
                                 }
                             }
                             edit = true; // vyhození do else
                         } else {
                             nearest.setX(e.getX()); //přesunutí bodu
                             nearest.setY(e.getY()); //přesunutí bodu
+                            if (!plClipperEdit) {
+                                pl.addPoints(start);
+                                plClipper.addPoints(startClipper);
+                                Polygon clipped = Clipper.clip(pl, plClipper);
+                                scanline.setPolygon(clipped);
+                                scanline.setFillColor(new Color(0x00ffff));
+                                scanline.fill();
+                                pl.getPoints().remove(pl.getPoints().size() - 1);
+                                plClipper.getPoints().remove(plClipper.getPoints().size() - 1);
+                                plClipperEdit = !plClipperEdit;
+                            }
                             update();
                             edit = false;
                         }
@@ -160,9 +173,9 @@ public class Controller2D implements Controller {
                     seedFill.setSeed(new Point(e.getX(), e.getY()));
                     seedFill.fill();
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    pl.addStartPoint(start, pl.getPoints().size());
+                    pl.addPoints(start);
                     scanline.setPolygon(pl);
-                    scanline.setFillColor(new Color(0xffff00));
+                    scanline.setFillColor(new Color(0x0f5235));
                     scanline.fill();
                     pl.getPoints().remove(pl.getPoints().size() - 1);
                 }
@@ -186,9 +199,17 @@ public class Controller2D implements Controller {
                 if (e.isControlDown()) return;
 
                 if (e.isShiftDown()) {
-
+                    if (SwingUtilities.isLeftMouseButton(e)) {
+                        if (plClipper.getPoints().size() > 2) {
+                            rasterizer.rasterize(plClipper.getPoints().get(0), plClipper.getPoints().get(plClipper.getPoints().size() - 1));
+                            //update();
+                        }
+                    }
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
-
+                    if (pl.getPoints().size() > 2) {
+                        rasterizer.rasterize(pl.getPoints().get(0), pl.getPoints().get(pl.getPoints().size() - 1));
+                        update();
+                    }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     //TODO
                 } else if (SwingUtilities.isMiddleMouseButton(e)) {
