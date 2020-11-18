@@ -195,60 +195,72 @@ public class Controller2D implements Controller {
             public void keyPressed(KeyEvent e) {
                 String stringColor;
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_1:
-                        seedFill.setChoice(1);
-                        mode = "Fill mode: Constant";
-                        break;
-                    case KeyEvent.VK_2:
-                        seedFill.setChoice(2);
-                        mode = "Fill mode: Circle";
-                        break;
-                    case KeyEvent.VK_3:
-                        seedFill.setChoice(3);
-                        mode = "Fill mode: Chessboard";
-                        break;
-                    case KeyEvent.VK_4:
-                        seedFill.setChoice(4);
-                        mode = "Fill mode: Stripes";
-                        break;
-                    case KeyEvent.VK_5:
-                        Object response = JOptionPane.showInputDialog(null, "Kterou barvu mám změnit?", "Změna barvy", JOptionPane.QUESTION_MESSAGE, null, new String[]{"Polygon 1", "Clipper Polygon", "SeedFill", "Scanline"}, "Polygon 1");
-                        if (response == null) {
-                            JOptionPane.showMessageDialog(null, "Změna barev zrušena, nebudou aplikovány žádné změny!", "Změna barvy", 1);
+                    case KeyEvent.VK_P:
+                        Object response2 = JOptionPane.showInputDialog(null, "Který pattern chceš v Seedfillu??", "Změna patternu", JOptionPane.QUESTION_MESSAGE, null, new String[]{"ConstantColor", "Circle", "Chessboard", "Stripes"}, "ConstantColor");
+                        if (response2 == null) {
+                            JOptionPane.showMessageDialog(null, "Výběr patternu zrušen, nebudou aplikovány žádné změny!", "Změna patternu", JOptionPane.INFORMATION_MESSAGE);
                             return;
                         }
-                        if (response.equals("Polygon 1")) {
-                            stringColor = showColorDialog();
-                            try {
-                                pl.setColor(Integer.decode(stringColor));
-                            } catch (Exception c) {
-                                badColorInput(c);
-                            }
+                        switch (response2.toString()) {
+                            case "ConstantColor":
+                                seedFill.setChoice(1);
+                                mode = "Fill mode: Constant";
+                                break;
+                            case "Circle":
+                                seedFill.setChoice(2);
+                                mode = "Fill mode: Circle";
+                                break;
+                            case "Chessboard":
+                                seedFill.setChoice(3);
+                                mode = "Fill mode: Chessboard";
+                                break;
+                            case "Stripes":
+                                seedFill.setChoice(4);
+                                mode = "Fill mode: Stripes";
+                                break;
                         }
-                        if (response.equals("Clipper Polygon")) {
-                            stringColor = showColorDialog();
-                            try {
-                                plClipper.setColor(Integer.decode(stringColor));
-                            } catch (Exception c) {
-                                badColorInput(c);
-                            }
+                        update();
+                        break;
+                    case KeyEvent.VK_B:
+                        Object response = JOptionPane.showInputDialog(null, "Kterou barvu mám změnit?", "Změna barvy", JOptionPane.QUESTION_MESSAGE, null, new String[]{"Polygon 1", "Clipper Polygon", "SeedFill", "Scanline"}, "Polygon 1");
+                        if (response == null) {
+                            JOptionPane.showMessageDialog(null, "Změna barev zrušena, nebudou aplikovány žádné změny!", "Změna barvy", JOptionPane.INFORMATION_MESSAGE);
+                            return;
                         }
-                        if (response.equals("Scanline")) {
-                            stringColor = showColorDialog();
-                            try {
-                                customColor = Integer.decode(stringColor);
-                            } catch (Exception c) {
-                                badColorInput(c);
-                            }
-                        }
-                        if (response.equals("SeedFill")) {
-                            stringColor = showColorDialog();
-                            try {
-                                seedFillColor = Integer.decode(stringColor);
-                                seedFill.setFillColor(seedFillColor);
-                            } catch (Exception c) {
-                                badColorInput(c);
-                            }
+                        switch (response.toString()) {
+                            case "Polygon 1":
+                                stringColor = showColorDialog();
+                                try {
+                                    pl.setColor(Integer.decode(stringColor));
+                                } catch (Exception c) {
+                                    badColorInput(c);
+                                }
+                                break;
+                            case "Clipper Polygon":
+                                stringColor = showColorDialog();
+                                try {
+                                    plClipper.setColor(Integer.decode(stringColor));
+                                } catch (Exception c) {
+                                    badColorInput(c);
+                                }
+                                break;
+                            case "Scanline":
+                                stringColor = showColorDialog();
+                                try {
+                                    customColor = Integer.decode(stringColor);
+                                } catch (Exception c) {
+                                    badColorInput(c);
+                                }
+                                break;
+                            case "SeedFill":
+                                stringColor = showColorDialog();
+                                try {
+                                    seedFillColor = Integer.decode(stringColor);
+                                    seedFill.setFillColor(seedFillColor);
+                                } catch (Exception c) {
+                                    badColorInput(c);
+                                }
+                                break;
                         }
 
                         update();
@@ -275,11 +287,10 @@ public class Controller2D implements Controller {
 
     private void badColorInput(Exception c) {
         if (c.getClass().getCanonicalName().equals("java.lang.NullPointerException")) {
-            JOptionPane.showMessageDialog(null, "Nastavení barvy bylo zrušeno, ponechávám defaultní!", "Změna barvy", 1);
+            JOptionPane.showMessageDialog(null, "Nastavení barvy bylo zrušeno, ponechávám defaultní!", "Změna barvy", JOptionPane.INFORMATION_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(null, "Špatně zadaná barva, ponechávám defaultní!", "Změna barvy", 0);
+            JOptionPane.showMessageDialog(null, "Špatně zadaná barva, ponechávám defaultní!", "Změna barvy", JOptionPane.ERROR_MESSAGE);
         }
-        return;
     }
 
     private void colorClipper() {
