@@ -26,16 +26,18 @@ public class Controller2D implements Controller {
     private ScanLine scanline;
     private LineRasterizer rasterizer;
     private SeedFillBorder seedFillBorder;
-    private boolean first = true;
-    private boolean editClipper = true;
-    private boolean plClipperEdit = true;
+    private boolean first;
+    private String mode;
+    private int customColor;
+    private int seedFillColor;
+    private boolean plClipperEdit;
     private Point start, last;
     private Point nearest;
-    private boolean edit = false; // rozhodujicí proměnná pro editaci bodu
-    private Polygon pl = new Polygon(0xff0000);
+    private boolean edit; // rozhodujicí proměnná pro editaci bodu
+    private Polygon pl;
     private PolygonRasterizer polygonRasterizer;
-    private Polygon plClipper = new Polygon(0xffff00);
-    private boolean firstClipper = true;
+    private Polygon plClipper;
+    private boolean firstClipper;
     private Point startClipper;
     private Point lastClipper;
 
@@ -46,17 +48,20 @@ public class Controller2D implements Controller {
     }
 
     public void initObjects(Raster raster) {
+        mode = "Fill mode: Constant";
+        customColor = 0x00ffff;
+        seedFillColor = 0x00ff00;
+        panel.drawString(mode, 10, 20);
         seedFill = new SeedFill(raster);
         rasterizer = new LineRasterizerGraphics(raster);
         scanline = new ScanLine(rasterizer);
         pl = new Polygon(0xff0000);
-        plClipper = new Polygon(0xffff00);
+        plClipper = new Polygon(0xFFff00);
         polygonRasterizer = new PolygonRasterizer(rasterizer);
         seedFillBorder = new SeedFillBorder(raster);
         firstClipper = true;
         first = true;
         edit = false;
-        editClipper = true;
         plClipperEdit = true;
     }
 
@@ -95,59 +100,16 @@ public class Controller2D implements Controller {
                         }
                         update();
                         if (plClipper.getPoints().size() > 2) {
-                            pl.addPoints(start);
-                            plClipper.addPoints(startClipper);
-                            Polygon clipped = Clipper.clip(pl, plClipper);
-                            scanline.setPolygon(clipped);
-                            scanline.setFillColor(new Color(0x00ffff));
-                            scanline.fill();
-                            pl.getPoints().remove(pl.getPoints().size() - 1);
-                            plClipper.getPoints().remove(plClipper.getPoints().size() - 1);
+                            colorClipper();
                         }
                     }
                     if (SwingUtilities.isRightMouseButton(e)) {
-                        if (!edit) { // určení nejbližšího bodu
-                            int nx = e.getX();
-                            int ny = e.getY();
-                            double temp = 99999999; // init hodnota, k zamezení chyby v podmínce pro porovnání
-                            if (e.isShiftDown()) {
-                                if (pl.getPoints().size() > 1) { // vyhledání nejbližšího bodu pomocí getDistance();
-                                    for (Point nearestPoint : pl.getPoints()) {
-                                        if (nearestPoint.getDistance(nx, ny) < temp) {
-                                            temp = nearestPoint.getDistance(nx, ny);
-                                            nearest = nearestPoint;
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (plClipper.getPoints().size() > 1) { // vyhledání nejbližšího bodu pomocí getDistance();
-                                    for (Point nearestPoint : plClipper.getPoints()) {
-                                        if (nearestPoint.getDistance(nx, ny) < temp) {
-                                            temp = nearestPoint.getDistance(nx, ny);
-                                            nearest = nearestPoint;
-                                        }
-                                    }
-                                    plClipperEdit = !plClipperEdit;
-                                }
-                            }
-                            edit = true; // vyhození do else
-                        } else {
-                            nearest.setX(e.getX()); //přesunutí bodu
-                            nearest.setY(e.getY()); //přesunutí bodu
-                            if (!plClipperEdit) {
-                                pl.addPoints(start);
-                                plClipper.addPoints(startClipper);
-                                Polygon clipped = Clipper.clip(pl, plClipper);
-                                scanline.setPolygon(clipped);
-                                scanline.setFillColor(new Color(0x00ffff));
-                                scanline.fill();
-                                pl.getPoints().remove(pl.getPoints().size() - 1);
-                                plClipper.getPoints().remove(plClipper.getPoints().size() - 1);
-                                plClipperEdit = !plClipperEdit;
-                            }
-                            update();
-                            edit = false;
-                        }
+                        pl.addPoints(start);
+                        scanline.setPolygon(pl);
+                        scanline.setFillColor(new Color(customColor));
+                        scanline.fill();
+                        pl.getPoints().remove(pl.getPoints().size() - 1);
+
                     }
 
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
@@ -173,21 +135,40 @@ public class Controller2D implements Controller {
                     seedFill.setSeed(new Point(e.getX(), e.getY()));
                     seedFill.fill();
                 } else if (SwingUtilities.isRightMouseButton(e)) {
-                    pl.addPoints(start);
-                    scanline.setPolygon(pl);
-                    scanline.setFillColor(new Color(0x0f5235));
-                    scanline.fill();
-                    pl.getPoints().remove(pl.getPoints().size() - 1);
-                }
-            }
-
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.isControlDown()) {
-                    if (SwingUtilities.isLeftMouseButton(e)) {
-                        //TODO
-                    } else if (SwingUtilities.isRightMouseButton(e)) {
-                        //TODO
+                    if (!edit) { // určení nejbližšího bodu
+                        int nx = e.getX();
+                        int ny = e.getY();
+                        double temp = 99999999; // init hodnota, k zamezení chyby v podmínce pro porovnání
+                        if (!e.isControlDown()) {
+                            if (pl.getPoints().size() > 1) { // vyhledání nejbližšího bodu pomocí getDistance();
+                                for (Point nearestPoint : pl.getPoints()) {
+                                    if (nearestPoint.getDistance(nx, ny) < temp) {
+                                        temp = nearestPoint.getDistance(nx, ny);
+                                        nearest = nearestPoint;
+                                    }
+                                }
+                            }
+                        } else {
+                            if (plClipper.getPoints().size() > 1) { // vyhledání nejbližšího bodu pomocí getDistance();
+                                for (Point nearestPoint : plClipper.getPoints()) {
+                                    if (nearestPoint.getDistance(nx, ny) < temp) {
+                                        temp = nearestPoint.getDistance(nx, ny);
+                                        nearest = nearestPoint;
+                                    }
+                                }
+                                plClipperEdit = !plClipperEdit;
+                            }
+                        }
+                        edit = true; // vyhození do else
+                    } else {
+                        nearest.setX(e.getX()); //přesunutí bodu
+                        nearest.setY(e.getY()); //přesunutí bodu
+                        if (!plClipperEdit) {
+                            colorClipper();
+                            plClipperEdit = !plClipperEdit;
+                        }
+                        update();
+                        edit = false;
                     }
                 }
             }
@@ -196,35 +177,85 @@ public class Controller2D implements Controller {
         panel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (e.isControlDown()) return;
 
                 if (e.isShiftDown()) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
-                        if (plClipper.getPoints().size() > 2) {
-                            rasterizer.rasterize(plClipper.getPoints().get(0), plClipper.getPoints().get(plClipper.getPoints().size() - 1));
-                            //update();
-                        }
+                        drawMovingLine(e, plClipper, startClipper, lastClipper, plClipper.getColor());
                     }
-                } else if (SwingUtilities.isLeftMouseButton(e)) {
-                    if (pl.getPoints().size() > 2) {
-                        rasterizer.rasterize(pl.getPoints().get(0), pl.getPoints().get(pl.getPoints().size() - 1));
-                        update();
+                } else {
+                    if (SwingUtilities.isLeftMouseButton(e)) {
+                        drawMovingLine(e, pl, start, last, pl.getColor());
                     }
-                } else if (SwingUtilities.isRightMouseButton(e)) {
-                    //TODO
-                } else if (SwingUtilities.isMiddleMouseButton(e)) {
-                    //TODO
                 }
-                update();
             }
         });
 
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                // na klávesu C vymazat plátno
-                if (e.getKeyCode() == KeyEvent.VK_C) {
-                    hardClear();
+                String stringColor;
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_1:
+                        seedFill.setChoice(1);
+                        mode = "Fill mode: Constant";
+                        break;
+                    case KeyEvent.VK_2:
+                        seedFill.setChoice(2);
+                        mode = "Fill mode: Circle";
+                        break;
+                    case KeyEvent.VK_3:
+                        seedFill.setChoice(3);
+                        mode = "Fill mode: Chessboard";
+                        break;
+                    case KeyEvent.VK_4:
+                        seedFill.setChoice(4);
+                        mode = "Fill mode: Stripes";
+                        break;
+                    case KeyEvent.VK_5:
+                        Object response = JOptionPane.showInputDialog(null, "Kterou barvu mám změnit?", "Změna barvy", JOptionPane.QUESTION_MESSAGE, null, new String[]{"Polygon 1", "Clipper Polygon", "SeedFill", "Scanline"}, "Polygon 1");
+                        if (response == null) {
+                            JOptionPane.showMessageDialog(null, "Změna barev zrušena, nebudou aplikovány žádné změny!", "Změna barvy", 1);
+                            return;
+                        }
+                        if (response.equals("Polygon 1")) {
+                            stringColor = showColorDialog();
+                            try {
+                                pl.setColor(Integer.decode(stringColor));
+                            } catch (Exception c) {
+                                badColorInput(c);
+                            }
+                        }
+                        if (response.equals("Clipper Polygon")) {
+                            stringColor = showColorDialog();
+                            try {
+                                plClipper.setColor(Integer.decode(stringColor));
+                            } catch (Exception c) {
+                                badColorInput(c);
+                            }
+                        }
+                        if (response.equals("Scanline")) {
+                            stringColor = showColorDialog();
+                            try {
+                                customColor = Integer.decode(stringColor);
+                            } catch (Exception c) {
+                                badColorInput(c);
+                            }
+                        }
+                        if (response.equals("SeedFill")) {
+                            stringColor = showColorDialog();
+                            try {
+                                seedFillColor = Integer.decode(stringColor);
+                                seedFill.setFillColor(seedFillColor);
+                            } catch (Exception c) {
+                                badColorInput(c);
+                            }
+                        }
+
+                        update();
+                        break;
+                    case KeyEvent.VK_C:
+                        hardClear();
+                        break;
                 }
             }
         });
@@ -238,10 +269,44 @@ public class Controller2D implements Controller {
         });
     }
 
+    private String showColorDialog() {
+        return JOptionPane.showInputDialog("Zadej barvu ve formátu: 0xffffff .");
+    }
+
+    private void badColorInput(Exception c) {
+        if (c.getClass().getCanonicalName().equals("java.lang.NullPointerException")) {
+            JOptionPane.showMessageDialog(null, "Nastavení barvy bylo zrušeno, ponechávám defaultní!", "Změna barvy", 1);
+        } else {
+            JOptionPane.showMessageDialog(null, "Špatně zadaná barva, ponechávám defaultní!", "Změna barvy", 0);
+        }
+        return;
+    }
+
+    private void colorClipper() {
+        pl.addPoints(start);
+        plClipper.addPoints(startClipper);
+        Polygon clipped = Clipper.clip(pl, plClipper);
+        scanline.setPolygon(clipped);
+        scanline.setFillColor(new Color(customColor));
+        scanline.fill();
+        pl.getPoints().remove(pl.getPoints().size() - 1);
+        plClipper.getPoints().remove(plClipper.getPoints().size() - 1);
+    }
+
+    private void drawMovingLine(MouseEvent e, Polygon pl, Point start, Point last, int lineColor) {
+        if (pl.getPoints().size() > 1) {
+            update();
+            rasterizer.rasterize(new Line(new Point(e.getX(), e.getY()), start, lineColor));
+            rasterizer.rasterize(new Line(new Point(e.getX(), e.getY()), last, lineColor));
+
+        }
+    }
+
     private void update() {
         panel.clear();
         polygonRasterizer.rasterize(pl); // znovu vykreslení polygonu
         polygonRasterizer.rasterize(plClipper);
+        panel.drawString(mode + " | Scanline color: " + customColor + " | SeedFillColor: " + seedFillColor, 10, 20);
         panel.repaint();
     }
 

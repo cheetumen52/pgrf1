@@ -56,4 +56,8 @@ public class Panel extends JPanel {
     public void clear() {
         raster.clear();
     }
+
+    public void drawString(String string, int x, int y) {
+        raster.getGraphics().drawString(string, x, y);
+    }
 }
