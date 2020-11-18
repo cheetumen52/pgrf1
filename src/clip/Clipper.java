@@ -54,7 +54,7 @@ public class Clipper {
         double x2 = edge.getX2();
         double y1 = edge.getY1();
         double y2 = edge.getY2();
-        return (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1 > 0.0;
+        return (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1 > 0.0; // / Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - y1, 2))
 
     }
 

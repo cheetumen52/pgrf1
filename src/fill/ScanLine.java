@@ -27,7 +27,8 @@ public class ScanLine implements Filler {
         for (int i = 0; i < pl.getPoints().size() - 1; i++) {
             Line line = new Line(pl.getPoints().get(i), pl.getPoints().get(i + 1), 0xff0000);
             if (!line.isHorizontal()) {
-                lines.add(line.setOrientation());
+                line = line.setOrientation();
+                lines.add(line);
                 if (yMin == -1) yMin = line.getY2();
                 if (yMax == -1) yMax = line.getY1();
                 if (yMin > line.getY2()) yMin = line.getY2();

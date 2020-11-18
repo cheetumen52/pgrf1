@@ -72,12 +72,6 @@ public class Controller2D implements Controller {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.isControlDown()) {
-                    if (SwingUtilities.isMiddleMouseButton(e)) {
-                        seedFillBorder.setFillColor(0x0000ff);
-                        seedFillBorder.setBorderColor(start);
-                        seedFillBorder.setSeed(new Point(e.getX(), e.getY()));
-                        seedFillBorder.fill();
-                    }
                 }
                 if (e.isShiftDown()) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
@@ -132,8 +126,18 @@ public class Controller2D implements Controller {
                     }
                     update();
                 } else if (SwingUtilities.isMiddleMouseButton(e)) {
-                    seedFill.setSeed(new Point(e.getX(), e.getY()));
-                    seedFill.fill();
+                    try {
+                        seedFillBorder.setFillColor(0x0000ff);
+                        seedFillBorder.setBorderColor(pl.getColor());
+                        seedFillBorder.setSeed(new Point(e.getX(), e.getY()));
+                        seedFillBorder.fill();
+                        if (e.isControlDown()) {
+                            seedFill.setSeed(new Point(e.getX(), e.getY()));
+                            seedFill.fill();
+                        }
+                    } catch (StackOverflowError s) {
+                        JOptionPane.showMessageDialog(null, "Přetekl zásobník! Algoritmus vybarvil co mohl. Aplikujte ho znovu na nevyplněné místo nebo se pokuste vyplnit menší tvar");
+                    }
                 } else if (SwingUtilities.isRightMouseButton(e)) {
                     if (!edit) { // určení nejbližšího bodu
                         int nx = e.getX();

@@ -21,31 +21,33 @@ public class SeedFillBorder implements Filler {
 
     @Override
     public void fill() {
-        seedFill(seed);
-    }
-
-    private void seedFill(Point seed) {
         if (borderColor != fillColor) {
-            if (seed.getX() >= 0 && seed.getY() >= 0 && seed.getX() < raster.getWidth() && seed.getY() < raster.getHeight()) {
-                if (raster.getPixel(seed.getX(), seed.getY()) != borderColor && raster.getPixel(seed.getX(), seed.getY()) != fillColor) {
-                    raster.setPixel(seed.getX(), seed.getY(), fillColor);
-                    seedFill(new Point(seed.getX() + 1, seed.getY()));
-                    seedFill(new Point(seed.getX() - 1, seed.getY()));
-                    seedFill(new Point(seed.getX(), seed.getY() + 1));
-                    seedFill(new Point(seed.getX(), seed.getY() - 1));
-                }
-
-            }
+            seedFill(seed);
         } else {
             System.out.println("Je třeba změnit barvu - border != fill");
         }
     }
 
-    public void setBorderColor(Point borderPoint) {
-        borderColor = raster.getPixel(borderPoint.getX(), borderPoint.getY());
+    private void seedFill(Point seed) {
+        if (seed.getX() >= 0 && seed.getY() >= 0 && seed.getX() < raster.getWidth() && seed.getY() < raster.getHeight()) {
+
+            int current_color = raster.getPixel(seed.getX(), seed.getY()) & 0xffffff;
+
+            if (current_color != borderColor && current_color != fillColor) {
+                raster.setPixel(seed.getX(), seed.getY(), fillColor);
+                seedFill(new Point(seed.getX() + 1, seed.getY()));
+                seedFill(new Point(seed.getX() - 1, seed.getY()));
+                seedFill(new Point(seed.getX(), seed.getY() + 1));
+                seedFill(new Point(seed.getX(), seed.getY() - 1));
+            }
+        }
+    }
+
+    public void setBorderColor(int borderColor) {
+        this.borderColor = borderColor & 0xffffff;
     }
 
     public void setFillColor(int fillColor) {
-        this.fillColor = fillColor;
+        this.fillColor = fillColor & 0xffffff;
     }
 }
