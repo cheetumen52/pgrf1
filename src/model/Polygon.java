@@ -16,10 +16,6 @@ public class Polygon {
         color = 0xff0000;
     }
 
-    public Polygon(ArrayList<Point> in) {
-        points = in;
-    }
-
 
     public int getColor() {
         return color;

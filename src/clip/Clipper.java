@@ -5,29 +5,30 @@ import model.Point;
 import model.Polygon;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Clipper {
-    private static List<Line> clipperEdges = new ArrayList<>();
-    public static Polygon clip(Polygon inputPolygon, Polygon clipperPoly) { //TODO return clipped polygon
 
-        ArrayList<Point> output = new ArrayList<>();
+    public static Polygon clip(Polygon inputPolygon, Polygon clipperPoly) {
+        Polygon result = new Polygon();
+
         if (inputPolygon.getPoints().size() < 2) return inputPolygon;
-        getEdges(clipperPoly);
+        ArrayList<Line> clipperEdges = getEdges(clipperPoly);
         for (Line edge : clipperEdges) {
-            output.clear();
-            Point v1 = inputPolygon.getPoints().get(inputPolygon.getPoints().size() - 1);
-            for (Point v2 : inputPolygon.getPoints()) {
-                if (isInside(v2, edge)) {
-                    if (!isInside(v1, edge)) output.add(intersection(v1, v2, edge));
-                    output.add(v2);
-                } else {
-                    if (isInside(v1, edge)) output.add(intersection(v1, v2, edge));
+            if (inputPolygon.getPoints().size() > 0) {
+                result = new Polygon();
+                Point v1 = inputPolygon.getPoints().get(inputPolygon.getPoints().size() - 1);
+                for (Point v2 : inputPolygon.getPoints()) {
+                    if (isInside(v2, edge)) {
+                        if (!isInside(v1, edge)) result.addPoints(intersection(v1, v2, edge));
+                        result.addPoints(v2);
+                    } else {
+                        if (isInside(v1, edge)) result.addPoints(intersection(v1, v2, edge));
+                    }
+                    v1 = v2;
                 }
-                v1 = v2;
+                inputPolygon = result;
             }
         }
-        Polygon result = new Polygon(output);
         return result;
     }
 
@@ -54,18 +55,17 @@ public class Clipper {
         double x2 = edge.getX2();
         double y1 = edge.getY1();
         double y2 = edge.getY2();
-        return (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1 > 0.0; // / Math.sqrt(Math.pow(y2 - y1, 2) + Math.pow(x2 - y1, 2))
+        return (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1 < 0.0;
 
     }
 
-    private static void getEdges(Polygon clipper) {
-        for (int i = 0; i < clipper.getPoints().size() - 1; i++) {
-            clipperEdges.add(new Line(clipper.getPoints().get(i).getX(), clipper.getPoints().get(i).getY(), clipper.getPoints().get(i + 1).getX(), clipper.getPoints().get(i + 1).getY(), 0xff0000));
-            if (i == clipper.getPoints().size()) {
-                clipperEdges.add(new Line(clipper.getPoints().get(i).getX(), clipper.getPoints().get(i).getY(), clipper.getPoints().get(0).getX(), clipper.getPoints().get(0).getY(), 0xff0000));
-            }
+    private static ArrayList<Line> getEdges(Polygon clipper) {
+        ArrayList<Line> clipperEdges = new ArrayList<>();
+        for (int i = 0; i < clipper.getPoints().size(); i++) {
+            clipperEdges.add(new Line(clipper.getPoints().get(i).getX(), clipper.getPoints().get(i).getY(), clipper.getPoints().get((i + 1) % clipper.getPoints().size()).getX(), clipper.getPoints().get((i + 1) % clipper.getPoints().size()).getY(), 0xff0000
+            ));
         }
-        return;
+        return clipperEdges;
     }
 
 }

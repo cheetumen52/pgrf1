@@ -13,16 +13,12 @@ public class PolygonRasterizer {
     }
 
     public void rasterize(Polygon polygon) {
-        for (int i = 0; i <= polygon.getPoints().size(); i++) { // vykreslení bodů polygonu
-            if (i + 1 < polygon.getPoints().size()) {
-                Point p1 = polygon.getPoints().get(i);
-                Point p2 = polygon.getPoints().get(i + 1);
-                Line line = new Line(p1, p2, polygon.getColor());
-                lr.rasterize(line);
-            }
-        }
-        if (polygon.getPoints().size() > 1) {
-            lr.rasterize(polygon.getPoints().get(0), polygon.getPoints().get(polygon.getPoints().size() - 1)); // propojí poslední point s prvním
+        for (int i = 0; i < polygon.getPoints().size(); i++) { // vykreslení bodů polygonu
+            Point p1 = polygon.getPoints().get(i);
+            Point p2 = polygon.getPoints().get((i + 1) % polygon.getPoints().size());
+            Line line = new Line(p1, p2, polygon.getColor());
+            lr.rasterize(line);
+
         }
     }
 

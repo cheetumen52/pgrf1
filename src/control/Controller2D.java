@@ -21,25 +21,26 @@ public class Controller2D implements Controller {
 
     private final Panel panel;
 
-    private int x, y, x2, y2, x3, y3, x4, y4;
+    private int x, y, x2, y2, x3, y3, x4, y4; // pomocné proměnné pro tvorbu polygonů
     private SeedFill seedFill;
     private ScanLine scanline;
     private LineRasterizer rasterizer;
     private SeedFillBorder seedFillBorder;
     private boolean first;
     private String mode;
+    // Barvy
     private int customColor;
     private int seedFillColor;
-    private boolean plClipperEdit;
+    private int borderFillColor;
+    //Temp body
     private Point start, last;
-    private Point nearest;
+    private Point nearest; // nejbližší bod - editace
     private boolean edit; // rozhodujicí proměnná pro editaci bodu
     private Polygon pl;
     private PolygonRasterizer polygonRasterizer;
-    private Polygon plClipper;
+    private Polygon plClipper; // polygon - clipper
     private boolean firstClipper;
-    private Point startClipper;
-    private Point lastClipper;
+    private Point startClipper, lastClipper; //pomocné body k polygonu
 
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -49,32 +50,30 @@ public class Controller2D implements Controller {
 
     public void initObjects(Raster raster) {
         mode = "Fill mode: Constant";
-        customColor = 0x00ffff;
+        customColor = 0x00ffff; // defaultní barvy
         seedFillColor = 0x00ff00;
-        panel.drawString(mode, 10, 20);
+        borderFillColor = 0x0000ff;
+        panel.drawString(mode, 10, 20); //vykreslení stringu -> pattern modu
         seedFill = new SeedFill(raster);
         rasterizer = new LineRasterizerGraphics(raster);
         scanline = new ScanLine(rasterizer);
-        pl = new Polygon(0xff0000);
+        pl = new Polygon(0xff0000); //defaultní barvy polygonů
         plClipper = new Polygon(0xFFff00);
         polygonRasterizer = new PolygonRasterizer(rasterizer);
         seedFillBorder = new SeedFillBorder(raster);
         firstClipper = true;
         first = true;
         edit = false;
-        plClipperEdit = true;
+
     }
 
     @Override
     public void initListeners(Panel panel) {
         panel.addMouseListener(new MouseAdapter() {
-
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.isControlDown()) {
-                }
                 if (e.isShiftDown()) {
-                    if (SwingUtilities.isLeftMouseButton(e)) {
+                    if (SwingUtilities.isLeftMouseButton(e)) { //tvorba clipper polygonu
                         if (firstClipper) {
                             x3 = e.getX();
                             y3 = e.getY();
@@ -97,16 +96,13 @@ public class Controller2D implements Controller {
                             colorClipper();
                         }
                     }
-                    if (SwingUtilities.isRightMouseButton(e)) {
-                        pl.addPoints(start);
+                    if (SwingUtilities.isRightMouseButton(e)) { //scanline
                         scanline.setPolygon(pl);
                         scanline.setFillColor(new Color(customColor));
                         scanline.fill();
-                        pl.getPoints().remove(pl.getPoints().size() - 1);
-
                     }
 
-                } else if (SwingUtilities.isLeftMouseButton(e)) {
+                } else if (SwingUtilities.isLeftMouseButton(e)) { //Tvorba polygonu
                     if (first) { // první bod v polygonu
                         x = e.getX();
                         y = e.getY();
@@ -125,20 +121,20 @@ public class Controller2D implements Controller {
                         pl.addPoints(p);
                     }
                     update();
-                } else if (SwingUtilities.isMiddleMouseButton(e)) {
+                } else if (SwingUtilities.isMiddleMouseButton(e)) { //seedFill
                     try {
-                        seedFillBorder.setFillColor(0x0000ff);
-                        seedFillBorder.setBorderColor(pl.getColor());
-                        seedFillBorder.setSeed(new Point(e.getX(), e.getY()));
-                        seedFillBorder.fill();
+                        seedFill.setSeed(new Point(e.getX(), e.getY()));
+                        seedFill.fill();
                         if (e.isControlDown()) {
-                            seedFill.setSeed(new Point(e.getX(), e.getY()));
-                            seedFill.fill();
+                            seedFillBorder.setFillColor(borderFillColor);
+                            seedFillBorder.setBorderColor(pl.getColor());
+                            seedFillBorder.setSeed(new Point(e.getX(), e.getY()));
+                            seedFillBorder.fill();
                         }
                     } catch (StackOverflowError s) {
                         JOptionPane.showMessageDialog(null, "Přetekl zásobník! Algoritmus vybarvil co mohl. Aplikujte ho znovu na nevyplněné místo nebo se pokuste vyplnit menší tvar");
                     }
-                } else if (SwingUtilities.isRightMouseButton(e)) {
+                } else if (SwingUtilities.isRightMouseButton(e)) { //editace bodů polygonu
                     if (!edit) { // určení nejbližšího bodu
                         int nx = e.getX();
                         int ny = e.getY();
@@ -160,18 +156,16 @@ public class Controller2D implements Controller {
                                         nearest = nearestPoint;
                                     }
                                 }
-                                plClipperEdit = !plClipperEdit;
                             }
                         }
                         edit = true; // vyhození do else
                     } else {
                         nearest.setX(e.getX()); //přesunutí bodu
                         nearest.setY(e.getY()); //přesunutí bodu
-                        if (!plClipperEdit) {
-                            colorClipper();
-                            plClipperEdit = !plClipperEdit;
-                        }
                         update();
+                        colorClipper();
+
+
                         edit = false;
                     }
                 }
@@ -180,8 +174,7 @@ public class Controller2D implements Controller {
 
         panel.addMouseMotionListener(new MouseAdapter() {
             @Override
-            public void mouseDragged(MouseEvent e) {
-
+            public void mouseDragged(MouseEvent e) { // pohyblivá čára při tažení myší -> viz metoda drawMovingLine()
                 if (e.isShiftDown()) {
                     if (SwingUtilities.isLeftMouseButton(e)) {
                         drawMovingLine(e, plClipper, startClipper, lastClipper, plClipper.getColor());
@@ -199,7 +192,12 @@ public class Controller2D implements Controller {
             public void keyPressed(KeyEvent e) {
                 String stringColor;
                 switch (e.getKeyCode()) {
+                    case KeyEvent.VK_H:
+                        // help dialog
+                        JOptionPane.showMessageDialog(null, "Přehled ovládání: \n P - Menu patternů \n B - Menu barev \n H - Toto menu \n LMB - přidání bodu polygonu \n LMB + shift - Přidání bodu do clipper polygonu \n RMB - Editace bodů (Polygon #1)\n RMB + ctrl - Editace bodů (Clipper polygon) \n RMB + shift - Scanline (Polygon #1) \n MMB - SeedFill\n MMB + ctrl - SeedFillBorder", "Help - Ovládání", JOptionPane.INFORMATION_MESSAGE);
+                        break;
                     case KeyEvent.VK_P:
+                        //vybírací menu - změna patternu
                         Object response2 = JOptionPane.showInputDialog(null, "Který pattern chceš v Seedfillu??", "Změna patternu", JOptionPane.QUESTION_MESSAGE, null, new String[]{"ConstantColor", "Circle", "Chessboard", "Stripes"}, "ConstantColor");
                         if (response2 == null) {
                             JOptionPane.showMessageDialog(null, "Výběr patternu zrušen, nebudou aplikovány žádné změny!", "Změna patternu", JOptionPane.INFORMATION_MESSAGE);
@@ -226,7 +224,8 @@ public class Controller2D implements Controller {
                         update();
                         break;
                     case KeyEvent.VK_B:
-                        Object response = JOptionPane.showInputDialog(null, "Kterou barvu mám změnit?", "Změna barvy", JOptionPane.QUESTION_MESSAGE, null, new String[]{"Polygon 1", "Clipper Polygon", "SeedFill", "Scanline"}, "Polygon 1");
+                        // vybírací menu - změna barev
+                        Object response = JOptionPane.showInputDialog(null, "Kterou barvu mám změnit?", "Změna barvy", JOptionPane.QUESTION_MESSAGE, null, new String[]{"Polygon 1", "Clipper Polygon", "SeedFill", "Scanline", "BorderFill"}, "Polygon 1");
                         if (response == null) {
                             JOptionPane.showMessageDialog(null, "Změna barev zrušena, nebudou aplikovány žádné změny!", "Změna barvy", JOptionPane.INFORMATION_MESSAGE);
                             return;
@@ -252,6 +251,7 @@ public class Controller2D implements Controller {
                                 stringColor = showColorDialog();
                                 try {
                                     customColor = Integer.decode(stringColor);
+                                    update();
                                 } catch (Exception c) {
                                     badColorInput(c);
                                 }
@@ -261,6 +261,15 @@ public class Controller2D implements Controller {
                                 try {
                                     seedFillColor = Integer.decode(stringColor);
                                     seedFill.setFillColor(seedFillColor);
+                                } catch (Exception c) {
+                                    badColorInput(c);
+                                }
+                                break;
+                            case "BorderFill":
+                                stringColor = showColorDialog();
+                                try {
+                                    borderFillColor = Integer.decode(stringColor);
+                                    seedFillBorder.setFillColor(borderFillColor);
                                 } catch (Exception c) {
                                     badColorInput(c);
                                 }
@@ -285,11 +294,11 @@ public class Controller2D implements Controller {
         });
     }
 
-    private String showColorDialog() {
+    private String showColorDialog() { //metoda pro zobrazení nastavení barvy
         return JOptionPane.showInputDialog("Zadej barvu ve formátu: 0xffffff .");
     }
 
-    private void badColorInput(Exception c) {
+    private void badColorInput(Exception c) { // metoda pro chybu v menu - cancel a špatně zadaná barva
         if (c.getClass().getCanonicalName().equals("java.lang.NullPointerException")) {
             JOptionPane.showMessageDialog(null, "Nastavení barvy bylo zrušeno, ponechávám defaultní!", "Změna barvy", JOptionPane.INFORMATION_MESSAGE);
         } else {
@@ -297,18 +306,14 @@ public class Controller2D implements Controller {
         }
     }
 
-    private void colorClipper() {
-        pl.addPoints(start);
-        plClipper.addPoints(startClipper);
+    private void colorClipper() { // vybarví ořezaný polygon
         Polygon clipped = Clipper.clip(pl, plClipper);
         scanline.setPolygon(clipped);
         scanline.setFillColor(new Color(customColor));
         scanline.fill();
-        pl.getPoints().remove(pl.getPoints().size() - 1);
-        plClipper.getPoints().remove(plClipper.getPoints().size() - 1);
     }
 
-    private void drawMovingLine(MouseEvent e, Polygon pl, Point start, Point last, int lineColor) {
+    private void drawMovingLine(MouseEvent e, Polygon pl, Point start, Point last, int lineColor) { //vykreslí pohyblivou čáru při tažení myší
         if (pl.getPoints().size() > 1) {
             update();
             rasterizer.rasterize(new Line(new Point(e.getX(), e.getY()), start, lineColor));
@@ -321,11 +326,11 @@ public class Controller2D implements Controller {
         panel.clear();
         polygonRasterizer.rasterize(pl); // znovu vykreslení polygonu
         polygonRasterizer.rasterize(plClipper);
-        panel.drawString(mode + " | Scanline color: " + customColor + " | SeedFillColor: " + seedFillColor, 10, 20);
+        panel.drawString(mode + " | Scanline color: " + customColor + " | SeedFillColor: " + seedFillColor, 10, 20); // aktuální mód a barvy
         panel.repaint();
     }
 
-    private void hardClear() {
+    private void hardClear() { // úplné smazání
         panel.clear();
         initObjects(panel.getRaster());
     }
